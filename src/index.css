@@ -1,0 +1,199 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* BlueSea Mobile Light Theme */
+    --background: 210 20% 98%;
+    --foreground: 200 33% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 200 33% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 33% 9%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 200 33% 9%;
+    --muted: 210 15% 95%;
+    --muted-foreground: 210 10% 40%;
+    --accent: 199 89% 48%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 200 15% 90%;
+    --input: 200 15% 90%;
+    --ring: 199 89% 48%;
+    --radius: 0.625rem;
+    
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 200 33% 9%;
+    --sidebar-primary: 199 89% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 200 33% 9%;
+    --sidebar-border: 200 15% 90%;
+    --sidebar-ring: 199 89% 48%;
+    
+    /* BlueSea Custom Properties */
+    --bluesea-primary: #0ea5e9;
+    --bluesea-secondary: #1da1f2;
+    --bluesea-gradient-start: #2563eb;
+    --bluesea-gradient-end: #60a5fa;
+    --bluesea-dark: #0b1720;
+    --bluesea-muted: #5b6670;
+    --bluesea-light: #f4f7f8;
+    --bluesea-card: #ffffff;
+    --bluesea-danger: #ff6b6b;
+    --bluesea-success: #27ae60;
+    --bluesea-warning: #f59e0b;
+  }
+
+  .dark {
+    /* BlueSea Mobile Dark Theme */
+    --background: 200 33% 9%;
+    --foreground: 210 20% 98%;
+    --card: 200 25% 12%;
+    --card-foreground: 210 20% 98%;
+    --popover: 200 25% 12%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 200 20% 15%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 200 20% 15%;
+    --muted-foreground: 210 10% 60%;
+    --accent: 199 89% 48%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 200 15% 20%;
+    --input: 200 15% 20%;
+    --ring: 199 89% 48%;
+    
+    /* Sidebar Dark */
+    --sidebar-background: 200 25% 12%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 199 89% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 200 20% 15%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 200 15% 20%;
+    --sidebar-ring: 199 89% 48%;
+    
+    /* BlueSea Custom Properties Dark */
+    --bluesea-primary: #0ea5e9;
+    --bluesea-secondary: #1da1f2;
+    --bluesea-gradient-start: #3b82f6;
+    --bluesea-gradient-end: #60a5fa;
+    --bluesea-dark: #f4f7f8;
+    --bluesea-muted: #94a3b8;
+    --bluesea-light: #0f172a;
+    --bluesea-card: #1e293b;
+    --bluesea-danger: #ef4444;
+    --bluesea-success: #22c55e;
+    --bluesea-warning: #f59e0b;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  /* BlueSea Button Styles */
+  .btn-bluesea {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all duration-fast;
+  }
+  
+  .btn-bluesea-primary {
+    @apply btn-bluesea bg-gradient-to-r from-bluesea-gradient-start to-bluesea-gradient-end text-white shadow-button;
+  }
+  
+  .btn-bluesea-primary:hover {
+    @apply shadow-button-hover -translate-y-0.5;
+  }
+  
+  .btn-bluesea-outline {
+    @apply btn-bluesea border-2 border-bluesea-primary text-bluesea-primary bg-transparent;
+  }
+  
+  .btn-bluesea-outline:hover {
+    @apply bg-bluesea-primary text-white;
+  }
+  
+  /* BlueSea Card Styles */
+  .card-bluesea {
+    @apply bg-card rounded-3xl p-6 shadow-card transition-shadow duration-fast;
+  }
+  
+  .card-bluesea:hover {
+    @apply shadow-card-hover;
+  }
+  
+  /* BlueSea Input Styles */
+  .input-bluesea {
+    @apply w-full px-4 py-3 rounded-lg bg-background border border-border text-foreground text-sm outline-none transition-all duration-fast;
+  }
+  
+  .input-bluesea:focus {
+    @apply border-bluesea-primary ring-2 ring-bluesea-primary/10;
+  }
+  
+  .input-bluesea::placeholder {
+    @apply text-muted-foreground;
+  }
+  
+  /* Gradient Text */
+  .text-gradient {
+    @apply bg-gradient-to-r from-bluesea-gradient-start to-bluesea-gradient-end bg-clip-text text-transparent;
+  }
+  
+  /* Glass Effect */
+  .glass {
+    @apply bg-white/80 dark:bg-black/50 backdrop-blur-lg;
+  }
+  
+  /* Hide Scrollbar */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer utilities {
+  /* Animation Utilities */
+  .animate-in {
+    animation: fade-in-up 0.4s ease-out forwards;
+  }
+  
+  .animate-slide-in-right {
+    animation: slide-in-right 0.3s ease-out forwards;
+  }
+  
+  .animate-slide-in-left {
+    animation: slide-in-left 0.3s ease-out forwards;
+  }
+  
+  .animate-scale-in {
+    animation: scale-in 0.2s ease-out forwards;
+  }
+}
