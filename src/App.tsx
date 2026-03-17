@@ -1,75 +1,61 @@
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import { AuthProvider, useAuth } from '@/context/AuthContext';
-import { Toaster } from '@/components/ui/sonner';
-
-// Pages
-import { LandingPage } from '@/pages/LandingPage';
-import { LoginPage } from '@/pages/LoginPage';
-import { DashboardPage } from '@/pages/DashboardPage';
-import { WalletPage } from '@/pages/WalletPage';
-import { AirtimePage } from '@/pages/AirtimePage';
-import { DataPage } from '@/pages/DataPage';
-import { ElectricityPage } from '@/pages/ElectricityPage';
-import { MarketplacePage } from '@/pages/MarketplacePage';
-import { ProfilePage } from '@/pages/ProfilePage';
-import { SettingsPage } from '@/pages/SettingsPage';
+import { useAuth } from '@/context/AuthContext';
+import {
+  LandingPage,
+  AuthPage,
+  Dashboard,
+  Wallet,
+  Airtime,
+  Data,
+  Marketplace,
+  Services,
+  Settings,
+  Profile,
+  CreatePin,
+  LightBills,
+  Transactions,
+  Rewards,
+  AirtimeBuyback,
+  GroupPayment,
+  Loyalty,
+  MoreServices,
+  Admin,
+  Notifications,
+} from '@/pages';
+import './App.css';
 
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bluesea-primary" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 }
 
 // Public Route Component (redirects to dashboard if authenticated)
 function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bluesea-primary" />
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return <>{children}</>;
+  const { isAuthenticated } = useAuth();
+  return !isAuthenticated ? <>{children}</> : <Navigate to="/dashboard" />;
 }
 
 function AppRoutes() {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route 
-        path="/" 
-        element={
-          <PublicRoute>
-            <LandingPage />
-          </PublicRoute>
-        } 
-      />
+      <Route path="/" element={<LandingPage />} />
       <Route 
         path="/login" 
         element={
           <PublicRoute>
-            <LoginPage />
+            <AuthPage />
+          </PublicRoute>
+        } 
+      />
+      <Route 
+        path="/signup" 
+        element={
+          <PublicRoute>
+            <AuthPage />
           </PublicRoute>
         } 
       />
@@ -79,7 +65,7 @@ function AppRoutes() {
         path="/dashboard" 
         element={
           <ProtectedRoute>
-            <DashboardPage />
+            <Dashboard />
           </ProtectedRoute>
         } 
       />
@@ -87,23 +73,7 @@ function AppRoutes() {
         path="/wallet" 
         element={
           <ProtectedRoute>
-            <WalletPage />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/wallet/fund" 
-        element={
-          <ProtectedRoute>
-            <WalletPage />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/wallet/transfer" 
-        element={
-          <ProtectedRoute>
-            <WalletPage />
+            <Wallet />
           </ProtectedRoute>
         } 
       />
@@ -111,7 +81,7 @@ function AppRoutes() {
         path="/airtime" 
         element={
           <ProtectedRoute>
-            <AirtimePage />
+            <Airtime />
           </ProtectedRoute>
         } 
       />
@@ -119,15 +89,7 @@ function AppRoutes() {
         path="/data" 
         element={
           <ProtectedRoute>
-            <DataPage />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/electricity" 
-        element={
-          <ProtectedRoute>
-            <ElectricityPage />
+            <Data />
           </ProtectedRoute>
         } 
       />
@@ -135,15 +97,15 @@ function AppRoutes() {
         path="/marketplace" 
         element={
           <ProtectedRoute>
-            <MarketplacePage />
+            <Marketplace />
           </ProtectedRoute>
         } 
       />
       <Route 
-        path="/profile" 
+        path="/services" 
         element={
           <ProtectedRoute>
-            <ProfilePage />
+            <Services />
           </ProtectedRoute>
         } 
       />
@@ -151,13 +113,101 @@ function AppRoutes() {
         path="/settings" 
         element={
           <ProtectedRoute>
-            <SettingsPage />
+            <Settings />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/profile" 
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/pin" 
+        element={
+          <ProtectedRoute>
+            <CreatePin />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/light-bills" 
+        element={
+          <ProtectedRoute>
+            <LightBills />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/transactions" 
+        element={
+          <ProtectedRoute>
+            <Transactions />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/rewards" 
+        element={
+          <ProtectedRoute>
+            <Rewards />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/airtime-buyback" 
+        element={
+          <ProtectedRoute>
+            <AirtimeBuyback />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/group-payment" 
+        element={
+          <ProtectedRoute>
+            <GroupPayment />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/loyalty" 
+        element={
+          <ProtectedRoute>
+            <Loyalty />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/more-services" 
+        element={
+          <ProtectedRoute>
+            <MoreServices />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin" 
+        element={
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/notifications" 
+        element={
+          <ProtectedRoute>
+            <Notifications />
           </ProtectedRoute>
         } 
       />
 
       {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
 }
@@ -166,10 +216,9 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <HashRouter>
+        <BrowserRouter>
           <AppRoutes />
-          <Toaster position="top-right" />
-        </HashRouter>
+        </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>
   );
