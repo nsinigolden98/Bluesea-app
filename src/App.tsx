@@ -26,6 +26,7 @@ import {
 } from '@/pages';
 import './App.css';
 
+
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -35,6 +36,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 // Public Route Component (redirects to dashboard if authenticated)
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
+  
   return !isAuthenticated ? <>{children}</> : <Navigate to="/dashboard" />;
 }
 
@@ -47,7 +49,7 @@ function AppRoutes() {
         path="/login" 
         element={
           <PublicRoute>
-            <AuthPage />
+            <AuthPage />      
           </PublicRoute>
         } 
       />

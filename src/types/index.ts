@@ -1,13 +1,16 @@
+import axios from 'axios'
+import Cookies from 'js-cookie'
+  
 // User Types
 export interface User {
-  id: string;
+  id: string; 
   email: string;
-  firstName: string;
+   firstName: string;
   surname: string;
   phone: string;
   profilePicture?: string;
-  balance: number;
-  bluePoints: number;
+  balance: string;
+  // bluePoints: number;
 }
 
 // Transaction Types
@@ -173,4 +176,148 @@ export interface MoreServiceCategory {
   id: string;
   name: string;
   services: MoreService[];
+}
+
+export const API_BASE = import.meta.env.VITE_API_BASE
+
+export const ENDPOINTS = {
+  login: `${API_BASE}/accounts/login/`,
+  signup: `${API_BASE}/accounts/sign-up/`,
+  sendOtp: `${API_BASE}/accounts/resend-otp/`,
+  sendOtp_FP: `${API_BASE}/accounts/password/reset/request/`,
+  verify_FP: `${API_BASE}/accounts/password/reset/verify-otp/`,
+  confirm_FP: `${API_BASE}/accounts/password/reset/confirm/`,
+  verifyOtp: `${API_BASE}/accounts/verify-email/`,
+  forgotReset: `${API_BASE}/accounts/auth/forgot-reset/`,
+  oauthGoogle: `${API_BASE}/accounts/auth/google/`,
+  balance: `${API_BASE}/wallet/balance/`,
+  fund: `${API_BASE}/transactions/fund-wallet/`,
+  webhook: `${API_BASE}/transactions/webhook/paystack/`,
+  history: `${API_BASE}/transactions/history/`,
+  withdraw: `${API_BASE}/transactions/withdraw/`,
+  user: `${API_BASE}/user_preference/user/`,
+  pin_set: `${API_BASE}/accounts/pin/set/`,
+  pin_verify: `${API_BASE}/accounts/pin/verify/`,
+  pin_reset: `${API_BASE}/accounts/pin/reset/`,
+  buy_airtime: `${API_BASE}/payments/airtime/`,
+  buy_airtel: `${API_BASE}/payments/airtel-data/`,
+  buy_mtn: `${API_BASE}/payments/mtn-data/`,
+  buy_glo: `${API_BASE}/payments/glo-data/`,
+  buy_etisalat: `${API_BASE}/payments/etisalat-data/`,
+  account_name: `${API_BASE}/transactions/account-name/`,
+  electricity: `${API_BASE}/payments/electricity/`,
+  electricity_user: `${API_BASE}/payments/electricity/customer/`,
+  group_payment_history: `${API_BASE}/payments/group-payment/history/`,
+  group_payment: `${API_BASE}/payments/group-payment/`,
+  dstv: `${API_BASE}/payments/dstv/`,
+  showmax: `${API_BASE}/payments/showmax/`,
+  startimes: `${API_BASE}/payments/startimes/`,
+  gotv: `${API_BASE}/payments/gotv/`,
+  create_group: `${API_BASE}/payments/group/create/`,
+  join_group: `${API_BASE}/payments/group/join-group/`,
+  add_to_group: `${API_BASE}/payments/group/add-member/`,
+  my_group: `${API_BASE}/payments/group/my-groups/`,
+  group_detail: `${API_BASE}/payments/group/`,
+  logout: `${API_BASE}/accounts/logout/`,
+  events: `${API_BASE}/marketplace/events/all/`,
+  create_events: `${API_BASE}/marketplace/events/create/`,
+  create_vendor: `${API_BASE}/marketplace/vendor/create/`,
+  vendor_status: `${API_BASE}/marketplace/vendor/status/`,
+  vendor_tickets: `${API_BASE}/marketplace/vendor/tickets/`,
+  tickets: `${API_BASE}/marketplace/tickets/`,
+  mytickets: `${API_BASE}/marketplace/tickets/my/`,
+  purchase: `${API_BASE}/marketplace/events/`,
+  scan_ticket: `${API_BASE}/marketplace/tickets/scan/`
+};
+
+// Save Access Token In Cookie
+export function setCookie(name:string,token:string) {
+  Cookies.set(name, token, {
+    expires: 1,
+    path: '',
+    secure: true,
+    sameSite:'strict'
+  })
+}
+
+// Get Cookie
+export function getCookie(name:string) {
+  return Cookies.get(name)
+}
+
+
+// Delete Cookie
+ export function deleteCookie(name:string) {
+   Cookies.remove(name, { path: '' });
+  }
+
+
+// GET REQUEST
+export async function getRequest(url: string, token:string) {
+  
+  try {
+    const response = await axios.get(url,
+      {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": 'application/json'
+        }
+      });
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// POST REQUEST
+export async function postRequest(url: string,token:string, payload: object) {
+    
+  try {
+    const response = await axios.post(url,payload,
+      {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": 'application/json'
+        }
+
+      });
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
+}
+// POST REQUEST (FILES)
+export async function postFileRequest(url: string,token:string ,payload: object) {
+    
+  try {
+    const response = await axios.post(url,payload,
+      {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// PUT REQUEST
+export async function putRequest(url: string, token:string,payload: object) {
+  try {
+    const response = await axios.put(url,payload,
+      {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": 'application/json'
+        }
+
+      });
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
 }

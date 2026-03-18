@@ -5,3 +5,4 @@ export { BalanceCard } from './BalanceCard';
 export { QuickActions } from './QuickActions';
 export { TransactionList } from './TransactionList';
 export { LoadingSpinner } from './LoadingSpinner';
+export {Toast } from './Toast'

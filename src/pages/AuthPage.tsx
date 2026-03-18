@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Logo } from '@/components/ui-custom';
+import { Logo,Toast } from '@/components/ui-custom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { Eye, EyeOff, Lock, Mail, User, Phone } from 'lucide-react';
+
+// import {Toast} from  '@/components/ui-custom/Toast'
 
 // Google Icon Component
 function GoogleIcon({ className }: { className?: string }) {
@@ -21,6 +23,7 @@ function GoogleIcon({ className }: { className?: string }) {
   );
 }
 
+
 type AuthMode = 'login' | 'signup';
 
 export function AuthPage() {
@@ -29,7 +32,7 @@ export function AuthPage() {
   const [mode, setMode] = useState<AuthMode>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+  const {showToast, ToastComponent} = Toast()
   // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -45,21 +48,19 @@ export function AuthPage() {
     
     if (mode === 'login') {
       await login({ email, password, rememberMe });
-      navigate('/dashboard');
+      showToast("hello")
+      // setTimeout(() => { navigate('/dashboard') }, 100000)
+     
+
     } else {
       if (password !== confirmPassword) {
-        alert('Passwords do not match');
-        return;
+        showToast('Passwords do not match');
       }
       await signup({ email, phone, firstName, surname, password, confirmPassword, agreeToTerms });
       navigate('/dashboard');
     }
   };
 
-  const handleGoogleLogin = async () => {
-    await googleLogin();
-    navigate('/dashboard');
-  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col">
@@ -89,8 +90,8 @@ export function AuthPage() {
               className={cn(
                 'flex-1 py-2.5 text-center font-medium transition-all rounded-full',
                 mode === 'signup' 
-                  ? 'bg-sky-500 text-white shadow-md' 
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
+                ? 'bg-sky-500 text-white shadow-md' 
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
               )}
             >
               Sign up
@@ -109,9 +110,10 @@ export function AuthPage() {
             </div>
 
             {/* Google Sign In Button */}
+           
             <button
               type="button"
-              onClick={handleGoogleLogin}
+              onClick= {googleLogin}
               disabled={loading}
               className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all mb-4"
             >
@@ -120,6 +122,7 @@ export function AuthPage() {
                 Continue with Google
               </span>
             </button>
+           
 
             {/* Divider */}
             <div className="relative my-6">
@@ -285,7 +288,7 @@ export function AuthPage() {
                   </Label>
                 </div>
               )}
-
+              <ToastComponent></ToastComponent>
               {/* Submit Button */}
               <Button 
                 type="submit" 
