@@ -12,7 +12,6 @@ import {
   API_BASE
 } from '@/types';
 import { useGoogleLogin, type TokenResponse } from '@react-oauth/google'
-
 interface AuthContextType extends AuthState {
   login: (data: LoginFormData) => Promise<void>;
   signup: (data: SignupFormData) => Promise<void>;
@@ -35,9 +34,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     deleteCookie('access_token')
     deleteCookie('refresh_token')
-    const response = await postRequest(ENDPOINTS.login,'',_data)
-    if (response.detail !== "No active account found with the given credentials") {
-      
+    const response = await postRequest(ENDPOINTS.login, '', _data)
+    console.log(response);
+    if (response.detail === undefined) {
+      // if (_data.rememberMe) {
+      //   setCookie('email', _data.email)
+      //   setCookie('password', _data.password)
+      // }
       if (response.user.email_verified) {
         const get_user = await getRequest(ENDPOINTS.user,response.access_token);
         const get_balance = await getRequest(ENDPOINTS.balance, response.access_token);
@@ -53,37 +56,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setState({
           isAuthenticated: true,
                 user: user,
-                loading: true,
-              });
-             // return "Login Successful Redirecting ...."
-           setCookie('access_token',response.refresh_token);
-           setCookie('refresh_token', response.access_token);       
-          } else{
-        await postRequest(ENDPOINTS.sendOtp,"", { email: _data.email });
+          loading: true,
+        });
         
-          
+           setCookie('access_token',response.refresh_token);
+        setCookie('refresh_token', response.access_token); 
+        
+        return 'Login Successful. Redirecting ...'
+          } else{
+        await postRequest(ENDPOINTS.sendOtp, "", { email: _data.email });
+          setState({
+            isAuthenticated: true,
+            user: null,
+            loading: false,
+          });
+        return 'Email Already Registered'
          }    
-    } else{
-       console.log(response)
-      // return "Incorrect Email Or Password"
+    } else {
+    setState({
+          isAuthenticated: false,
+          user: null,
+          loading: false,
+    });
+      return response.detail
+      
     }
       
   }, []);
 
   const signup = useCallback(async (data: SignupFormData) => {
     setState(prev => ({ ...prev, loading: true }));
-    setState({
+    
+    // const response = await postRequest(ENDPOINTS.signup, "", data);
+    // console.log(response)
+    // if (response.state) {
+      
+    //        setState({
+    //     isAuthenticated: false,
+    //     user: null,
+    //     loading: false,
+    //        });
+    //    return response
+    // } else {
+       setState({
       isAuthenticated: false,
       user: null,
-      loading: true,
-    });
-     const response = await postRequest(ENDPOINTS.signup,"" ,data);
-    if (response.state){
-          return response.message
-    } else {
-      
-      return response.message
-    }
+      loading: false,
+       });
+    //       }
       
     
   }, []);

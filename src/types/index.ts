@@ -178,6 +178,7 @@ export interface MoreServiceCategory {
   services: MoreService[];
 }
 
+
 export const API_BASE = import.meta.env.VITE_API_BASE
 
 export const ENDPOINTS = {
@@ -285,7 +286,8 @@ export async function postRequest(url: string,token:string, payload: object) {
       });
     return response.data
   } catch (error) {
-    console.log(error)
+    const response = error.response
+    return response.data
   }
 }
 // POST REQUEST (FILES)
@@ -321,3 +323,4 @@ export async function putRequest(url: string, token:string,payload: object) {
     console.log(error)
   }
 }
+

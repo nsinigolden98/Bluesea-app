@@ -7,7 +7,7 @@ export function Toast() {
     visible: false,
   });
 
-  const showToast = useCallback((msg: string, ms = 3000) => {
+  const showToast = useCallback((msg: string, ms = 10000) => {
     setToastData({ msg, visible: true });
     
     setTimeout(() => {
@@ -15,7 +15,6 @@ export function Toast() {
     }, ms);
   }, []);
 
-  // This is the component you render in your JSX
   const ToastComponent = () => {
     if (!toastData.visible) return null;
     return (

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Logo,Toast } from '@/components/ui-custom';
+import { Logo,Toast, AuthEmailModal } from '@/components/ui-custom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,8 +8,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { Eye, EyeOff, Lock, Mail, User, Phone } from 'lucide-react';
-
-// import {Toast} from  '@/components/ui-custom/Toast'
 
 // Google Icon Component
 function GoogleIcon({ className }: { className?: string }) {
@@ -24,15 +22,40 @@ function GoogleIcon({ className }: { className?: string }) {
 }
 
 
+function normalizeNigeriaPhone(raw:string) {
+  if (!raw) return null;
+  let s = raw.trim().replace(/\s+/g, "");
+  // strip non-digits except leading +
+  if (s.startsWith("+")) {
+    s = "+" + s.slice(1).replace(/\D/g, "");
+  } else {
+    s = s.replace(/\D/g, "");
+  }
+
+  // local 0XXXXXXXXXX (11)
+  if (/^0\d{10}$/.test(s)) {
+    const second = s[1];
+    if (!/[789]/.test(second)) return null;
+    return `+234${s.slice(1)}`;
+  }
+  // +234XXXXXXXXXX
+  if (/^\+234\d{10}$/.test(s)) {
+    const firstAfter = s[4];
+    if (!/[789]/.test(firstAfter)) return null;
+    return s;
+  }
+  return null;
+}
 type AuthMode = 'login' | 'signup';
 
 export function AuthPage() {
   const navigate = useNavigate();
-  const { login, signup, googleLogin, loading } = useAuth();
+  const { login, signup, googleLogin, loading} = useAuth();
   const [mode, setMode] = useState<AuthMode>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const {showToast, ToastComponent} = Toast()
+  const { showToast, ToastComponent } = Toast()
+  const {showModal, hideModal,ModalComponent} = AuthEmailModal()
   // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,23 +70,25 @@ export function AuthPage() {
     e.preventDefault();
     
     if (mode === 'login') {
-      await login({ email, password, rememberMe });
-      showToast("hello")
-      // setTimeout(() => { navigate('/dashboard') }, 100000)
-     
-
+      const response = await login({ email, password, rememberMe });
+      showToast(response)
     } else {
       if (password !== confirmPassword) {
         showToast('Passwords do not match');
       }
-      await signup({ email, phone, firstName, surname, password, confirmPassword, agreeToTerms });
-      navigate('/dashboard');
+      else{
+        await signup({ email, phone, firstName, surname, password, confirmPassword, agreeToTerms });
+        showModal()
+        
+        navigate('/login');
+      }
     }
   };
 
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col">
+    <div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col" onClick={hideModal}>
       {/* Header */}
       <div className="p-4 md:p-6">
         <Logo size="sm" />
@@ -162,7 +187,7 @@ export function AuthPage() {
                       id="phone"
                       type="tel"
                       placeholder="0803 123 4567 or +2348031234567"
-                      value={phone}
+                      value={normalizeNigeriaPhone(phone)}
                       onChange={(e) => setPhone(e.target.value)}
                       className="pl-10 h-11"
                       required
@@ -288,6 +313,7 @@ export function AuthPage() {
                   </Label>
                 </div>
               )}
+           
               <ToastComponent></ToastComponent>
               {/* Submit Button */}
               <Button 
@@ -302,5 +328,7 @@ export function AuthPage() {
         </div>
       </div>
     </div>
+      <ModalComponent />
+      </div>
   );
 }
