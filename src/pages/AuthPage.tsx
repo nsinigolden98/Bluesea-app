@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Logo,Toast, AuthEmailModal } from '@/components/ui-custom';
 import { Button } from '@/components/ui/button';
@@ -55,7 +55,7 @@ export function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { showToast, ToastComponent } = Toast()
-  const {showModal, hideModal,ModalComponent} = AuthEmailModal()
+  const {showModal, hideModal,ModalComponent, modalData} = AuthEmailModal()
   // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -79,16 +79,33 @@ export function AuthPage() {
       else{
         await signup({ email, phone, firstName, surname, password, confirmPassword, agreeToTerms });
         showModal()
-        
         navigate('/login');
       }
     }
   };
+  const bodyDivRef = useRef<HTMLDivElement>(null)
+  
 
-
+  const hideSignUpModal = () => {
+    if (bodyDivRef.current) {
+      bodyDivRef.current.style.opacity = '1'
+      
+    }
+  }
+    const showSignUpModal = () => {
+    if (bodyDivRef.current) {
+      bodyDivRef.current.style.opacity = '0.5'
+    }
+  }
+  if (!modalData.visible) {
+    hideSignUpModal()
+  }
+  else {
+    showSignUpModal()
+  }
   return (
     <div>
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col" onClick={hideModal}>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col" onClick={hideModal}   ref={bodyDivRef}>
       {/* Header */}
       <div className="p-4 md:p-6">
         <Logo size="sm" />

@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // } else {
        setState({
       isAuthenticated: false,
-      user: null,
+      user: data,
       loading: false,
        });
     //       }
