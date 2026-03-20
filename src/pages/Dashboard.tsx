@@ -94,7 +94,7 @@ export function Dashboard() {
             </div>
 
             {/* Recent Transactions */}
-            <TransactionList />
+           <TransactionList />
           </div>
         </main>
       </div>

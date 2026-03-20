@@ -1,4 +1,5 @@
 import type { DataPlan, Service, NavItem, Transaction, BluePointHistory, Task, Streak, Announcement, Notification, LoyaltyItem, GroupPayment } from '@/types';
+import { ENDPOINTS, getRequest} from '@/types';
 
 export const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'LayoutGrid', path: '/dashboard' },
@@ -35,13 +36,49 @@ export const services: Service[] = [
   { id: '12', name: 'Airtime Buyback', icon: 'RefreshCw', category: 'Special Features' },
 ];
 
-export const mockTransactions: Transaction[] = [
-  { id: '1', description: 'Airtime Purchase - MTN', date: '2025-03-15', amount: 1000, type: 'debit', status: 'completed' },
-  { id: '2', description: 'Data Purchase - 2GB', date: '2025-03-14', amount: 500, type: 'debit', status: 'completed' },
-  { id: '3', description: 'Wallet Funding', date: '2025-03-13', amount: 5000, type: 'credit', status: 'completed' },
-  { id: '4', description: 'Blue Points Redemption', date: '2025-03-12', amount: 200, type: 'credit', status: 'completed' },
-  { id: '5', description: 'Light Bill Payment', date: '2025-03-10', amount: 3000, type: 'debit', status: 'completed' },
-];
+// export  const Transactions:Transaction =   async() =>{
+//   const response = await getRequest(ENDPOINTS.history)
+//   const page_length = Math.round(response.count / 5) + 1;
+//   const data:Array<Transaction> = []
+//   for (let i = 1; i <= page_length; i++) { 
+//     const page = await getRequest(`${ENDPOINTS.history}?page=${i}`); 
+//     for (let j = 0; j < 5; j++){
+//       if (page.results[j] !== undefined) {       
+//         data.push(page.results[j])
+//       }
+//     }
+//   }
+
+//   console.log(data)
+//   return data
+// }
+  
+export const Transactions= async ():Promise<Transaction[]> => {
+  try {
+    const response = await getRequest(ENDPOINTS.history);
+    
+    const page_length = Math.ceil(response.count / 5);
+
+    // Create an array of page numbers [1, 2, 3...]
+    const pages = Array.from({ length: page_length }, (_, i) => i + 1);
+
+    // Fetch all pages in parallel (much faster than a sequential for-loop)
+    const pageResults = await Promise.all(
+      pages.map(page => getRequest(`${ENDPOINTS.history}?page=${page}`))
+    );
+
+    // Flatten all results into a single array and filter out any empty/undefined entries
+    const allData = pageResults
+      .flatMap(page => page.results)
+      .filter(item => item !== undefined);
+    return allData;
+  } catch (error) {
+    console.error("Failed to fetch transactions:", error);
+    return []; // Return empty array on failure to prevent UI crashes
+  }
+};
+
+
 
 // BluePoints History
 export const bluePointHistory: BluePointHistory[] = [

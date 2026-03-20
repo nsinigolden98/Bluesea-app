@@ -10,17 +10,18 @@ export interface User {
   phone: string;
   profilePicture?: string;
   balance: string;
+  transactions: Array<Transaction>;
   // bluePoints: number;
 }
 
 // Transaction Types
 export interface Transaction {
-  id: string;
-  description: string;
-  date: string;
-  amount: number;
-  type: 'credit' | 'debit';
-  status: 'pending' | 'completed' | 'failed';
+    id: number;
+    description: string;
+    created_at: string;
+    amount: number;
+    transaction_type: 'CREDIT' | 'DEBIT';
+    status: string;
 }
 
 // Network Types
@@ -235,27 +236,30 @@ export const ENDPOINTS = {
 export function setCookie(name:string,token:string) {
   Cookies.set(name, token, {
     expires: 1,
-    path: '',
-    secure: true,
-    sameSite:'strict'
+    path: '/',
+    // secure: false,
+    // sameSite:'strict'
   })
+  
 }
 
 // Get Cookie
-export function getCookie(name:string) {
-  return Cookies.get(name)
+function getCookie(name:string) {
+  const cookie = Cookies.get(name)
+  return cookie
 }
 
+export const token = getCookie('access_token')
 
 // Delete Cookie
  export function deleteCookie(name:string) {
-   Cookies.remove(name, { path: '' });
+   Cookies.remove(name, { path: '/' });
   }
 
 
 // GET REQUEST
-export async function getRequest(url: string, token:string) {
-  
+export async function getRequest(url: string) {
+
   try {
     const response = await axios.get(url,
       {
@@ -272,8 +276,7 @@ export async function getRequest(url: string, token:string) {
 }
 
 // POST REQUEST
-export async function postRequest(url: string,token:string, payload: object) {
-    
+export async function postRequest(url: string, payload: object) {
   try {
     const response = await axios.post(url,payload,
       {
@@ -286,13 +289,11 @@ export async function postRequest(url: string,token:string, payload: object) {
       });
     return response.data
   } catch (error) {
-    const response = error.response
-    return response.data
+      return error?.response?.data
   }
 }
 // POST REQUEST (FILES)
-export async function postFileRequest(url: string,token:string ,payload: object) {
-    
+export async function postFileRequest(url: string,payload: object) {
   try {
     const response = await axios.post(url,payload,
       {
@@ -307,7 +308,7 @@ export async function postFileRequest(url: string,token:string ,payload: object)
 }
 
 // PUT REQUEST
-export async function putRequest(url: string, token:string,payload: object) {
+export async function putRequest(url: string, payload: object) {
   try {
     const response = await axios.put(url,payload,
       {

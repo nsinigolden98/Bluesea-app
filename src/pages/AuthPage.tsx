@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Logo,Toast, AuthEmailModal } from '@/components/ui-custom';
+import { Logo,Toast, AuthEmailModal, Loader } from '@/components/ui-custom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,7 +22,7 @@ function GoogleIcon({ className }: { className?: string }) {
 }
 
 
-function normalizeNigeriaPhone(raw:string) {
+function normalizeNigeriaPhone(raw:string|undefined) {
   if (!raw) return null;
   let s = raw.trim().replace(/\s+/g, "");
   // strip non-digits except leading +
@@ -55,7 +55,9 @@ export function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { showToast, ToastComponent } = Toast()
-  const {showModal, hideModal,ModalComponent, modalData} = AuthEmailModal()
+  const { showModal, hideModal, ModalComponent, modalData } = AuthEmailModal()
+  const {showLoader, hideLoader, LoaderComponent} =Loader()
+   
   // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -68,20 +70,33 @@ export function AuthPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    showLoader()
     
     if (mode === 'login') {
-      const response = await login({ email, password, rememberMe });
-      showToast(response)
+      const response:string = await login({ email, password, rememberMe });
+      if (response === 'Verify Account') {
+        // continue from here
+        showModal()
+      } else {
+        showToast(response)
+      }
+      
     } else {
       if (password !== confirmPassword) {
         showToast('Passwords do not match');
       }
       else{
-        await signup({ email, phone, firstName, surname, password, confirmPassword, agreeToTerms });
-        showModal()
+        const response: boolean = await signup({ email, phone, firstName, surname, password, confirmPassword, agreeToTerms });
+        if (response) {
+          // Continue from here
+          showModal()
+        } else {
+          showToast("Email Already Registered")
+        }
         navigate('/login');
       }
     }
+    hideLoader()
   };
   const bodyDivRef = useRef<HTMLDivElement>(null)
   
@@ -204,7 +219,7 @@ export function AuthPage() {
                       id="phone"
                       type="tel"
                       placeholder="0803 123 4567 or +2348031234567"
-                      value={normalizeNigeriaPhone(phone)}
+                      value={normalizeNigeriaPhone(phone) || undefined}
                       onChange={(e) => setPhone(e.target.value)}
                       className="pl-10 h-11"
                       required
@@ -344,7 +359,8 @@ export function AuthPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+        <LoaderComponent/>
       <ModalComponent />
       </div>
   );
