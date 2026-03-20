@@ -237,8 +237,8 @@ export function setCookie(name:string,token:string) {
   Cookies.set(name, token, {
     expires: 1,
     path: '/',
-    // secure: false,
-    // sameSite:'strict'
+    secure: false,
+    sameSite:'strict'
   })
   
 }
