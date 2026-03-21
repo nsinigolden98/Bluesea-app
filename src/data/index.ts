@@ -35,25 +35,8 @@ export const services: Service[] = [
   { id: '11', name: 'Blue Point', icon: 'Coins', category: 'Value Added' },
   { id: '12', name: 'Airtime Buyback', icon: 'RefreshCw', category: 'Special Features' },
 ];
-
-// export  const Transactions:Transaction =   async() =>{
-//   const response = await getRequest(ENDPOINTS.history)
-//   const page_length = Math.round(response.count / 5) + 1;
-//   const data:Array<Transaction> = []
-//   for (let i = 1; i <= page_length; i++) { 
-//     const page = await getRequest(`${ENDPOINTS.history}?page=${i}`); 
-//     for (let j = 0; j < 5; j++){
-//       if (page.results[j] !== undefined) {       
-//         data.push(page.results[j])
-//       }
-//     }
-//   }
-
-//   console.log(data)
-//   return data
-// }
   
-export const Transactions= async ():Promise<Transaction[]> => {
+export const TransactionsData= async ():Promise<Transaction[]> => {
   try {
     const response = await getRequest(ENDPOINTS.history);
     

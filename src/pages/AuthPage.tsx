@@ -57,7 +57,7 @@ export function AuthPage() {
   const { showToast, ToastComponent } = Toast()
   const { showModal, hideModal, ModalComponent, modalData } = AuthEmailModal()
   const {showLoader, hideLoader, LoaderComponent} =Loader()
-   
+  
   // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -99,7 +99,6 @@ export function AuthPage() {
     hideLoader()
   };
   const bodyDivRef = useRef<HTMLDivElement>(null)
-  
 
   const hideSignUpModal = () => {
     if (bodyDivRef.current) {
@@ -118,8 +117,10 @@ export function AuthPage() {
   else {
     showSignUpModal()
   }
+    
+  
   return (
-    <div>
+    <div >
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col" onClick={hideModal}   ref={bodyDivRef}>
       {/* Header */}
       <div className="p-4 md:p-6">
@@ -351,9 +352,9 @@ export function AuthPage() {
               <Button 
                 type="submit" 
                 className="w-full rounded-xl bg-sky-500 hover:bg-sky-600 h-11 font-medium"
-                disabled={loading}
+                // disabled={loading}
               >
-                {loading ? 'Please wait...' : mode === 'login' ? 'Log in' : 'Sign up'}
+                { mode === 'login' ? 'Log in' : 'Sign up'}
               </Button>
             </form>
           </div>

@@ -3,7 +3,7 @@ import Cookies from 'js-cookie'
   
 // User Types
 export interface User {
-  id: string; 
+  id?: string; 
   email: string;
    firstName: string;
   surname: string;
@@ -244,12 +244,12 @@ export function setCookie(name:string,token:string) {
 }
 
 // Get Cookie
-function getCookie(name:string) {
-  const cookie = Cookies.get(name)
-  return cookie
+function getCookie(name:string){
+  const cookie:string|undefined = Cookies.get(name);
+    return cookie
 }
 
-export const token = getCookie('access_token')
+export const token:string = getCookie('access_token') || ''
 
 // Delete Cookie
  export function deleteCookie(name:string) {

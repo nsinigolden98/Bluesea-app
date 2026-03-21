@@ -6,6 +6,7 @@ import { Megaphone, X, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export function Dashboard() {
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([]);
   const navigate = useNavigate();
@@ -25,10 +26,10 @@ export function Dashboard() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        <Header 
-          title="Dashboard" 
+        <Header
+          title="Dashboard"
           subtitle="Buy Smarter & Cheaper"
-          onMenuClick={() => setSidebarOpen(true)} 
+          onMenuClick={() => setSidebarOpen(true)}
         />
 
         <main className="flex-1 p-4 md:p-6 overflow-y-auto">
@@ -37,15 +38,15 @@ export function Dashboard() {
             {activeAnnouncements.length > 0 && (
               <div className="space-y-2">
                 {activeAnnouncements.map((announcement) => (
-                  <div 
+                  <div
                     key={announcement.id}
                     className={cn(
                       'relative rounded-xl p-4 pr-10',
-                      announcement.type === 'promo' 
+                      announcement.type === 'promo'
                         ? 'bg-gradient-to-r from-orange-400 to-orange-500 text-white'
                         : announcement.type === 'feature'
-                        ? 'bg-gradient-to-r from-sky-400 to-sky-500 text-white'
-                        : 'bg-gradient-to-r from-purple-400 to-purple-500 text-white'
+                          ? 'bg-gradient-to-r from-sky-400 to-sky-500 text-white'
+                          : 'bg-gradient-to-r from-purple-400 to-purple-500 text-white'
                     )}
                   >
                     <div className="flex items-start gap-3">
@@ -56,7 +57,7 @@ export function Dashboard() {
                         <h4 className="font-semibold text-sm">{announcement.title}</h4>
                         <p className="text-xs text-white/80 mt-0.5">{announcement.content}</p>
                       </div>
-                      <button 
+                      <button
                         onClick={() => dismissAnnouncement(announcement.id)}
                         className="absolute top-2 right-2 p-1.5 hover:bg-white/20 rounded-lg transition-colors"
                       >
@@ -75,7 +76,7 @@ export function Dashboard() {
             <QuickActions />
 
             {/* Rewards Teaser */}
-            <div 
+            <div
               onClick={() => navigate('/rewards')}
               className="bg-gradient-to-r from-sky-500 to-sky-600 rounded-2xl p-5 text-white cursor-pointer hover:shadow-lg transition-shadow"
             >
@@ -94,7 +95,7 @@ export function Dashboard() {
             </div>
 
             {/* Recent Transactions */}
-           <TransactionList />
+            <TransactionList />
           </div>
         </main>
       </div>

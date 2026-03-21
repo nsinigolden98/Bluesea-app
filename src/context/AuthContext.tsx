@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect} from 'react';
 import {
   type User,
   type AuthState,
@@ -12,15 +12,17 @@ import {
   API_BASE
 } from '@/types';
 import { useGoogleLogin, type TokenResponse } from '@react-oauth/google'
-import { Transactions } from '@/data';
+import { TransactionsData } from '@/data';
 interface AuthContextType extends AuthState {
   login: (data: LoginFormData) => Promise<string>;
   signup: (data: SignupFormData) => Promise<boolean>;
   logout: () => void;
-  googleLogin: ()=> void;
+  googleLogin: () => void;
+  load?: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({
@@ -28,7 +30,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user: null,
     loading: false,
   });
-
+  
+useEffect( () => {
+  const loadUser = async () => {
+    setState(prev => ({ ...prev, loading: true }));
+  
+    try {
+      const get_user = await getRequest(ENDPOINTS.user);
+      const get_balance = await getRequest(ENDPOINTS.balance);
+      const transaction = await TransactionsData()
+      
+      const user: User = {
+        email: get_user.email,
+        firstName: get_user.other_names,
+        surname: get_user.surname,
+        phone: get_user.phone,
+        profilePicture: `${API_BASE}/${get_user.image}`,
+        balance: get_balance.balance,
+        transactions: transaction,
+      };
+       
+      setState({
+        isAuthenticated: true,
+        user: user,
+        loading: false,
+      });
+    } catch (error) {
+      setState(prev => ({ ...prev, loading: true }));
+      console.log(error)
+    }
+  }
+  loadUser()
+       
+  },[]);
+  
   const login = useCallback(async (_data: LoginFormData) => {
     setState(prev => ({ ...prev, loading: true }));
 
@@ -46,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         const get_user = await getRequest(ENDPOINTS.user);
         const get_balance = await getRequest(ENDPOINTS.balance);
-        const transaction = await Transactions()
+        const transaction = await TransactionsData()
               const user: User = {
                 id:response.user.id,
                 email: get_user.email,
@@ -120,7 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
       const get_user = await getRequest(ENDPOINTS.user)
          const get_balance = await getRequest(ENDPOINTS.balance)
-          const transaction = await Transactions()
+          const transaction = await TransactionsData()
     const user: User = {
                 id:get_user.id,
                 email: get_user.email,
@@ -151,7 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         signup,
         logout,
-         googleLogin,
+        googleLogin,
       }}
     >
       {children}
