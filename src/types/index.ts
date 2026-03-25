@@ -10,6 +10,7 @@ export interface User {
   phone: string;
   profilePicture?: string;
   balance: string;
+  pin_is_set: boolean;
   transactions: Array<Transaction>;
   // bluePoints: number;
 }
@@ -238,7 +239,7 @@ export function setCookie(name:string,token:string) {
     expires: 1,
     path: '/',
     secure: false,
-    sameSite:'strict'
+    sameSite:'strict',
   })
   
 }

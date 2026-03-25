@@ -6,14 +6,22 @@ import { Label } from '@/components/ui/label';
 import { networks, airtimeAmounts } from '@/data';
 import { cn } from '@/lib/utils';
 import type { Network } from '@/types';
+import { useAuth } from '@/context/AuthContext';
+import { Toast, Loader } from '@/components/ui-custom';
+import { PinModal } from '@/components/ui-custom';
+import { useNavigate } from 'react-router-dom';
 
 export function Airtime() {
+  const { user } = useAuth()
+  const navigate = useNavigate();
+  const { showToast, ToastComponent } = Toast()
+  const{PinComponent, showPinModal}= PinModal()
+  const {LoaderComponent}= Loader()
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<Network>('MTN');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(user?.phone);
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState('');
-
   const handleRecharge = (amount: number) => {
     setSelectedAmount(amount);
     setCustomAmount('');
@@ -24,18 +32,31 @@ export function Airtime() {
     setSelectedAmount(null);
   };
 
-  const handleBuyAirtime = () => {
+  const handleBuyAirtime = async() => {
     const amount = selectedAmount || Number(customAmount);
     if (!phoneNumber || !amount) {
-      alert('Please fill in all fields');
+      showToast('Please fill in all fields');
       return;
     }
-    alert(`Buying ₦${amount} airtime for ${phoneNumber} on ${selectedNetwork}`);
+    else if (!user?.pin_is_set) {
+      navigate('/settings');
+      navigate('/pin');
+      return;
+    } else{
+      showPinModal()
+    }
+    
   };
 
   const finalAmount = selectedAmount || Number(customAmount) || 0;
+  const payload = {
+    amount: String(finalAmount),
+    network: selectedNetwork.toLowerCase() !== "9mobile" ? selectedNetwork.toLowerCase() : "etisalat",
+    phone_number: String(phoneNumber),             
+  };
 
   return (
+    <div>
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex">
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -101,7 +122,7 @@ export function Airtime() {
                     >
                       <p className="font-bold text-slate-800 dark:text-white">₦{amount}</p>
                       <p className="text-xs text-slate-500">Airtime</p>
-                      <Button 
+                      {/* <Button 
                         size="sm" 
                         className={cn(
                           'mt-2 w-full rounded-full text-xs',
@@ -111,7 +132,7 @@ export function Airtime() {
                         )}
                       >
                         RECHARGE NOW
-                      </Button>
+                      </Button> */}
                     </button>
                   ))}
                 </div>
@@ -161,6 +182,10 @@ export function Airtime() {
           </div>
         </main>
       </div>
-    </div>
+      </div>
+      <PinComponent type = "airtime" value = {payload} />
+      <ToastComponent />
+      <LoaderComponent/>
+      </div>
   );
 }

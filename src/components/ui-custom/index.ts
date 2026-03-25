@@ -7,4 +7,5 @@ export { TransactionList } from './TransactionList';
 export { LoadingSpinner } from './LoadingSpinner';
 export {Toast } from './Toast'
 export { AuthEmailModal } from './AuthModal'
-export {Loader} from './Loader'
+export {Loader, AuthLoader} from './Loader'
+export {PinModal} from './PinModal'

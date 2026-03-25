@@ -26,19 +26,9 @@ import {
 import './App.css';
 import { useAuth } from '@/context/AuthContext';
 
-
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated} = useAuth()
-  // const {LoaderComponent, showLoader, hideLoader}= Loader()
-  
-// loading ? showLoader:hideLoader
-//   console.log(loading)
-//   if (loading) {
-
-//     return <LoaderComponent />
-//   }
-
   
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 }

@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Logo,Toast, AuthEmailModal, Loader } from '@/components/ui-custom';
+import { Logo,Toast, AuthEmailModal, Loader,AuthLoader } from '@/components/ui-custom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { Eye, EyeOff, Lock, Mail, User, Phone } from 'lucide-react';
+import { token } from '@/types'
 
 // Google Icon Component
 function GoogleIcon({ className }: { className?: string }) {
@@ -120,7 +121,13 @@ export function AuthPage() {
     
   
   return (
-    <div >
+    <div>
+      {token ?(
+        <div> 
+            <AuthLoader/>
+      </div>
+      ): (
+        <div >
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col" onClick={hideModal}   ref={bodyDivRef}>
       {/* Header */}
       <div className="p-4 md:p-6">
@@ -363,6 +370,8 @@ export function AuthPage() {
       </div>
         <LoaderComponent/>
       <ModalComponent />
+      </div>
+    )}
       </div>
   );
 }

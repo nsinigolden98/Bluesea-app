@@ -28,3 +28,13 @@ export function Loader() {
   };
   return { showLoader, hideLoader, LoaderComponent};
 }
+
+export function AuthLoader() {
+  
+    return (
+       <div className="loader-screen" id="loader">
+  <div className="logo">B<span id='S'>S</span></div>
+  <div className="loading-text">Loading...</div>
+</div>
+    )
+}

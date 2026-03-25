@@ -13,6 +13,7 @@ import {
 } from '@/types';
 import { useGoogleLogin, type TokenResponse } from '@react-oauth/google'
 import { TransactionsData } from '@/data';
+import {token} from '@/types'
 interface AuthContextType extends AuthState {
   login: (data: LoginFormData) => Promise<string>;
   signup: (data: SignupFormData) => Promise<boolean>;
@@ -36,25 +37,36 @@ useEffect( () => {
     setState(prev => ({ ...prev, loading: true }));
   
     try {
-      const get_user = await getRequest(ENDPOINTS.user);
-      const get_balance = await getRequest(ENDPOINTS.balance);
-      const transaction = await TransactionsData()
+      if (token) {
+        
+        const get_user = await getRequest(ENDPOINTS.user);
+        const get_balance = await getRequest(ENDPOINTS.balance);
+        const transaction = await TransactionsData()
       
-      const user: User = {
-        email: get_user.email,
-        firstName: get_user.other_names,
-        surname: get_user.surname,
-        phone: get_user.phone,
-        profilePicture: `${API_BASE}/${get_user.image}`,
-        balance: get_balance.balance,
-        transactions: transaction,
-      };
+        const user: User = {
+          email: get_user.email,
+          firstName: get_user.other_names,
+          surname: get_user.surname,
+          phone: get_user.phone,
+          profilePicture: `${API_BASE}/${get_user.image}`,
+          balance: get_balance.balance,
+          transactions: transaction,
+          pin_is_set: get_user.pin_is_set,
+        };
        
-      setState({
-        isAuthenticated: true,
-        user: user,
-        loading: false,
-      });
+        setState({
+          isAuthenticated: true,
+          user: user,
+          loading: false,
+        });
+      }
+       else {
+        setState({
+          isAuthenticated: false,
+          user: null,
+          loading: false,
+        });
+      }
     } catch (error) {
       setState(prev => ({ ...prev, loading: true }));
       console.log(error)
@@ -91,6 +103,7 @@ useEffect( () => {
                 profilePicture: `${API_BASE}/${get_user.image}`,
                 balance: get_balance.balance,
                 transactions: transaction,
+                pin_is_set: get_user.pin_is_set,
         } 
         setState({
           isAuthenticated: true,
@@ -165,6 +178,7 @@ useEffect( () => {
                 profilePicture: `${API_BASE}/${get_user.image}`,
                 balance: get_balance.balance,
                 transactions: transaction,
+                pin_is_set: get_user.pin_is_set,
         } 
       setState({
       isAuthenticated: true,
