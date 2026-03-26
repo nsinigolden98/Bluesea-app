@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef} from 'react';
 import { Sidebar, Header } from '@/components/ui-custom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,19 +7,17 @@ import { networks, airtimeAmounts } from '@/data';
 import { cn } from '@/lib/utils';
 import type { Network } from '@/types';
 import { useAuth } from '@/context/AuthContext';
-import { Toast, Loader } from '@/components/ui-custom';
-import { PinModal } from '@/components/ui-custom';
+import { PinModal} from '@/components/ui-custom';
 import { useNavigate } from 'react-router-dom';
 
 export function Airtime() {
   const { user } = useAuth()
+  const defaultNumber = "0" + user?.phone.slice(-10,);
   const navigate = useNavigate();
-  const { showToast, ToastComponent } = Toast()
-  const{PinComponent, showPinModal}= PinModal()
-  const {LoaderComponent}= Loader()
+  const { PinComponent, showPinModal, modalData} = PinModal()
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<Network>('MTN');
-  const [phoneNumber, setPhoneNumber] = useState(user?.phone);
+  const [phoneNumber, setPhoneNumber] = useState(defaultNumber);
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState('');
   const handleRecharge = (amount: number) => {
@@ -35,14 +33,15 @@ export function Airtime() {
   const handleBuyAirtime = async() => {
     const amount = selectedAmount || Number(customAmount);
     if (!phoneNumber || !amount) {
-      showToast('Please fill in all fields');
+      alert('Please fill in all fields');
       return;
     }
-    else if (!user?.pin_is_set) {
+    if (!user?.pin_is_set) {
       navigate('/settings');
       navigate('/pin');
       return;
-    } else{
+    } else {
+      showPaymentModal()
       showPinModal()
     }
     
@@ -54,10 +53,29 @@ export function Airtime() {
     network: selectedNetwork.toLowerCase() !== "9mobile" ? selectedNetwork.toLowerCase() : "etisalat",
     phone_number: String(phoneNumber),             
   };
+const bodyDivRef = useRef<HTMLDivElement>(null)
+
+  const hidePaymentModal = () => {
+    if (bodyDivRef.current) {
+      bodyDivRef.current.style.opacity = '1'
+      
+    }
+  }
+    const showPaymentModal = () => {
+    if (bodyDivRef.current) {
+      bodyDivRef.current.style.opacity = '0.5'
+    }
+  }
+  if (!modalData.visible) {
+    hidePaymentModal()
+  }
+  else {
+    showPaymentModal()
+  }
 
   return (
     <div>
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex" ref={bodyDivRef}>
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -99,7 +117,8 @@ export function Airtime() {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="Enter phone number"
+                    placeholder="Enter phone number"
+                    maxLength={11}
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                 />
@@ -183,9 +202,8 @@ export function Airtime() {
         </main>
       </div>
       </div>
-      <PinComponent type = "airtime" value = {payload} />
-      <ToastComponent />
-      <LoaderComponent/>
+      <PinComponent type="airtime" value={payload} />
+      
       </div>
   );
 }

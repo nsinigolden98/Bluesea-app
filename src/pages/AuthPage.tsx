@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { Eye, EyeOff, Lock, Mail, User, Phone } from 'lucide-react';
-import { token } from '@/types'
+import { TOKEN } from '@/types'
 
 // Google Icon Component
 function GoogleIcon({ className }: { className?: string }) {
@@ -122,7 +122,7 @@ export function AuthPage() {
   
   return (
     <div>
-      {token ?(
+      {TOKEN ?(
         <div> 
             <AuthLoader/>
       </div>

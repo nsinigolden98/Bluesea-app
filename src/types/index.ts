@@ -234,8 +234,8 @@ export const ENDPOINTS = {
 };
 
 // Save Access Token In Cookie
-export function setCookie(name:string,token:string) {
-  Cookies.set(name, token, {
+export function setCookie(name:string,TOKEN:string) {
+  Cookies.set(name, TOKEN, {
     expires: 1,
     path: '/',
     secure: false,
@@ -250,7 +250,7 @@ function getCookie(name:string){
     return cookie
 }
 
-export const token:string = getCookie('access_token') || ''
+export const TOKEN:string = getCookie('access_token') || ''
 
 // Delete Cookie
  export function deleteCookie(name:string) {
@@ -265,7 +265,7 @@ export async function getRequest(url: string) {
     const response = await axios.get(url,
       {
         headers: {
-          "Authorization": `Bearer ${token}`,
+          "Authorization": `Bearer ${TOKEN}`,
           "Content-Type": "application/json",
           "Accept": 'application/json'
         }
@@ -282,7 +282,7 @@ export async function postRequest(url: string, payload: object) {
     const response = await axios.post(url,payload,
       {
         headers: {
-          "Authorization": `Bearer ${token}`,
+          "Authorization": `Bearer ${TOKEN}`,
           "Content-Type": "application/json",
           "Accept": 'application/json'
         }
@@ -299,7 +299,7 @@ export async function postFileRequest(url: string,payload: object) {
     const response = await axios.post(url,payload,
       {
         headers: {
-          "Authorization": `Bearer ${token}`,
+          "Authorization": `Bearer ${TOKEN}`,
         },
       });
     return response.data
@@ -314,7 +314,7 @@ export async function putRequest(url: string, payload: object) {
     const response = await axios.put(url,payload,
       {
         headers: {
-          "Authorization": `Bearer ${token}`,
+          "Authorization": `Bearer ${TOKEN}`,
           "Content-Type": "application/json",
           "Accept": 'application/json'
         }

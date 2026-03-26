@@ -13,7 +13,7 @@ import {
 } from '@/types';
 import { useGoogleLogin, type TokenResponse } from '@react-oauth/google'
 import { TransactionsData } from '@/data';
-import {token} from '@/types'
+import {TOKEN} from '@/types'
 interface AuthContextType extends AuthState {
   login: (data: LoginFormData) => Promise<string>;
   signup: (data: SignupFormData) => Promise<boolean>;
@@ -37,7 +37,7 @@ useEffect( () => {
     setState(prev => ({ ...prev, loading: true }));
   
     try {
-      if (token) {
+      if (TOKEN !== '') {
         
         const get_user = await getRequest(ENDPOINTS.user);
         const get_balance = await getRequest(ENDPOINTS.balance);

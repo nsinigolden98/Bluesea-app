@@ -97,11 +97,16 @@ export function CreatePin() {
   const PinInput = ({
     type,
     label,
+    
   }: {
     type: 'current' | 'new' | 'confirm';
     label: string;
-  }) => (
-    <div className="space-y-3">
+    
+    }) => {
+    
+    
+  
+  return ( <div className="space-y-3">
       <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
         {label}
       </label>
@@ -128,6 +133,7 @@ export function CreatePin() {
       </div>
     </div>
   );
+  };
 
   return (
     <div>
