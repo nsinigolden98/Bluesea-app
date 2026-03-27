@@ -30,8 +30,12 @@ export function PinModal() {
      
       if (type === 'airtime') {
         const response = await postRequest(ENDPOINTS.buy_airtime, value)
-         return response.response_description  || response.error
-    };
+        return response.response_description || response.error  
+    }
+   else if (type === 'light') {
+        const response = await postRequest(ENDPOINTS.electricity, value);
+        return response.response_description || response.error  
+    }
 
   };
 

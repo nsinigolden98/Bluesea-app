@@ -1,12 +1,44 @@
-import { useState } from 'react';
-import { Sidebar, Header } from '@/components/ui-custom';
+import { useState, useRef } from 'react';
+import { Sidebar, Header} from '@/components/ui-custom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Toast, PinModal, Loader } from '@/components/ui-custom'
+import { useAuth } from '@/context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { ENDPOINTS, postRequest } from '@/types';
 
 const meterTypes = ['Prepaid', 'Postpaid'];
-const billers = ['IKEDC', 'EKEDC', 'AEDC', 'PHEDC', 'KEDCO', 'JEDC'];
+interface BillerName {
+  'Ikeja Electric(IKEDC)': string;
+  'Eko Electric(EKEDC)': string;
+  'Kano Electric(KEDCO)': string;
+  'Port-harcourt Electric(PHED)': string;
+  'Jos Electric(JED)': string;
+  'Ibadan Electric(IBEDC)': string;
+  'Kaduna Electric(KAEDCO)': string;
+  'Abuja Electric(AEDC)': string;
+  'Enugu Electric(EEDC)': string;
+  'Benin Electric(BEDC)': string;
+  'Aba Electric(ABA)': string;
+  'Yola Electric(YEDC)': string;
+}
+const BILLER_NAME:BillerName = {
+  'Ikeja Electric(IKEDC)': 'ikeja-electric',
+  'Eko Electric(EKEDC)': 'eko-electric',
+  'Kano Electric(KEDCO)': 'kano-electric',
+  'Port-harcourt Electric(PHED)': 'portharcourt-electric',
+  'Jos Electric(JED)': 'jos-electric',
+  'Ibadan Electric(IBEDC)': 'ibadan-electric',
+  'Kaduna Electric(KAEDCO)': 'kaduna-electric',
+  'Abuja Electric(AEDC)': 'abuja-electric',
+  'Enugu Electric(EEDC)': 'enugu-electric',
+  'Benin Electric(BEDC)': 'benin-electric',
+  'Aba Electric(ABA)': 'aba-electric',
+  'Yola Electric(YEDC)': 'yola-electric'
+};
+const billers = Object.keys(BILLER_NAME);
 
 export function LightBills() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -14,20 +46,70 @@ export function LightBills() {
   const [meterType, setMeterType] = useState('');
   const [biller, setBiller] = useState('');
   const [amount, setAmount] = useState('');
+  const { showToast, ToastComponent } = Toast();
+  const { PinComponent, showPinModal, modalData } = PinModal()
+  const { user } = useAuth()
+  const {LoaderComponent, showLoader, hideLoader}= Loader()
+  const navigate = useNavigate()
+  const [customer, setCustomer] = useState('')
 
   const pricePerUnit = 70;
   const units = amount ? Math.floor(Number(amount) / pricePerUnit) : 0;
-
-  const handleContinue = () => {
+  const payload = {
+    billerCode: meterNumber,
+    amount: Number(amount),
+    biller_name: BILLER_NAME[biller],
+    meter_type: meterType.toLowerCase(),
+  }
+  const handleContinue = async() => {
     if (!meterNumber || !meterType || !biller || !amount) {
-      alert('Please fill in all fields');
+      showToast('Please fill in all fields');
       return;
     }
-    alert(`Purchasing ${units} units for meter ${meterNumber}`);
-  };
+    else if (!user?.pin_is_set) {
+      navigate('/settings');
+      navigate('/pin');
+      return
+    }
+    else {
+      showToast("Searching For Customer ...", 3000)
+      showLoader()
+    const data =  {
+          meter_number: Number(meterNumber),
+          meter_type: meterType.toLowerCase(),
+            biller: BILLER_NAME[biller]
+      }
+      const response = await postRequest(ENDPOINTS.electricity_user, data)
+      hideLoader()
+      setCustomer(`Customer: ${response.response.Customer_Name}`)
+      showPinModal();
 
+    }
+  };
+  const bodyDivRef = useRef<HTMLDivElement>(null)
+
+  const hidePaymentModal = () => {
+    if (bodyDivRef.current) {
+      bodyDivRef.current.style.opacity = '1'
+      
+    }
+  }
+  const showPaymentModal = () => {
+    if (bodyDivRef.current) {
+      bodyDivRef.current.style.opacity = '0.5'
+    }
+  }
+  if (!modalData.visible) {
+    hidePaymentModal()
+  }
+  else {
+    showPaymentModal()
+  }
+
+  
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex">
+    <div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex" ref={bodyDivRef}>
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -47,9 +129,12 @@ export function LightBills() {
                 <div className="space-y-6">
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-semibold text-slate-800 dark:text-white">
-                      Meter Profile
-                    </h3>
-                    <span className="text-xs text-slate-400">Meter not linked</span>
+                        Meter Profile
+                      <br />
+                      
+                        {customer}
+                      </h3>
+                 
                   </div>
 
                   <div className="space-y-4">
@@ -57,6 +142,8 @@ export function LightBills() {
                       <Label htmlFor="meterNumber">Meter Number</Label>
                       <Input
                         id="meterNumber"
+                        type='text'
+                        inputMode='numeric'
                         placeholder="Enter meter number"
                         value={meterNumber}
                         onChange={(e) => setMeterNumber(e.target.value)}
@@ -140,6 +227,10 @@ export function LightBills() {
           </div>
         </main>
       </div>
-    </div>
+      </div>
+      <LoaderComponent/>
+      <ToastComponent />
+      <PinComponent type='light' value={payload}/>
+      </div>
   );
 }
