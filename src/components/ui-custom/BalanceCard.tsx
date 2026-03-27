@@ -53,7 +53,7 @@ export function BalanceCard({
 
         <div className="mb-6">
           <span className="text-3xl md:text-4xl font-bold text-white">
-            {showBalance ? `₦${balance.toLocaleString()}` : '******'}
+            {showBalance ? `${balance.toLocaleString()}` : '******'}
           </span>
         </div>
 

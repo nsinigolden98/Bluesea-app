@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { postRequest, getCookie, ENDPOINTS } from '@/types';
+import { postRequest, ENDPOINTS } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import './AuthModal.css';
 
@@ -46,11 +46,10 @@ export function AuthEmailModal() {
 
   const ModalComponent = () => {
   
-    const access_token = getCookie('access_token')
     const {user} = useAuth()
     const [otp, setOTP] = useState('')
     const verifyEmailOTP = async() => {
-      await postRequest(ENDPOINTS.sendOtp, access_token, { email:user.email})
+      await postRequest(ENDPOINTS.sendOtp, { email:user?.email })
     }
     if (!modalData.visible) {
       return null

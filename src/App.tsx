@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import { useAuth } from '@/context/AuthContext';
 import {
   LandingPage,
   AuthPage,
@@ -25,18 +24,19 @@ import {
   Notifications,
 } from '@/pages';
 import './App.css';
-
+import { useAuth } from '@/context/AuthContext';
 
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated} = useAuth()
+  
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 }
 
 // Public Route Component (redirects to dashboard if authenticated)
-function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
-  
+function PublicRoute({ children}: { children: React.ReactNode}) {
+  const {isAuthenticated} = useAuth() 
+
   return !isAuthenticated ? <>{children}</> : <Navigate to="/dashboard" />;
 }
 
@@ -48,7 +48,7 @@ function AppRoutes() {
       <Route 
         path="/login" 
         element={
-          <PublicRoute>
+          <PublicRoute  >
             <AuthPage />      
           </PublicRoute>
         } 
@@ -56,7 +56,7 @@ function AppRoutes() {
       <Route 
         path="/signup" 
         element={
-          <PublicRoute>
+          <PublicRoute  >
             <AuthPage />
           </PublicRoute>
         } 
@@ -66,7 +66,7 @@ function AppRoutes() {
       <Route 
         path="/dashboard" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <Dashboard />
           </ProtectedRoute>
         } 
@@ -74,7 +74,7 @@ function AppRoutes() {
       <Route 
         path="/wallet" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <Wallet />
           </ProtectedRoute>
         } 
@@ -82,7 +82,7 @@ function AppRoutes() {
       <Route 
         path="/airtime" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <Airtime />
           </ProtectedRoute>
         } 
@@ -90,7 +90,7 @@ function AppRoutes() {
       <Route 
         path="/data" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <Data />
           </ProtectedRoute>
         } 
@@ -98,7 +98,7 @@ function AppRoutes() {
       <Route 
         path="/marketplace" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute   >
             <Marketplace />
           </ProtectedRoute>
         } 
@@ -106,7 +106,7 @@ function AppRoutes() {
       <Route 
         path="/services" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <Services />
           </ProtectedRoute>
         } 
@@ -114,7 +114,7 @@ function AppRoutes() {
       <Route 
         path="/settings" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <Settings />
           </ProtectedRoute>
         } 
@@ -122,7 +122,7 @@ function AppRoutes() {
       <Route 
         path="/profile" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <Profile />
           </ProtectedRoute>
         } 
@@ -130,7 +130,7 @@ function AppRoutes() {
       <Route 
         path="/pin" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <CreatePin />
           </ProtectedRoute>
         } 
@@ -138,7 +138,7 @@ function AppRoutes() {
       <Route 
         path="/light-bills" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <LightBills />
           </ProtectedRoute>
         } 
@@ -146,7 +146,7 @@ function AppRoutes() {
       <Route 
         path="/transactions" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <Transactions />
           </ProtectedRoute>
         } 
@@ -154,7 +154,7 @@ function AppRoutes() {
       <Route 
         path="/rewards" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <Rewards />
           </ProtectedRoute>
         } 
@@ -162,7 +162,7 @@ function AppRoutes() {
       <Route 
         path="/airtime-buyback" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <AirtimeBuyback />
           </ProtectedRoute>
         } 
@@ -170,7 +170,7 @@ function AppRoutes() {
       <Route 
         path="/group-payment" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <GroupPayment />
           </ProtectedRoute>
         } 
@@ -178,7 +178,7 @@ function AppRoutes() {
       <Route 
         path="/loyalty" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <Loyalty />
           </ProtectedRoute>
         } 
@@ -186,7 +186,7 @@ function AppRoutes() {
       <Route 
         path="/more-services" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <MoreServices />
           </ProtectedRoute>
         } 
@@ -194,7 +194,7 @@ function AppRoutes() {
       <Route 
         path="/admin" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <Admin />
           </ProtectedRoute>
         } 
@@ -202,7 +202,7 @@ function AppRoutes() {
       <Route 
         path="/notifications" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute  >
             <Notifications />
           </ProtectedRoute>
         } 

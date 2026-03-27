@@ -10,4 +10,8 @@
     width:80%;
     padding:10px 14px; 
     border-radius:8px; 
-    box-shadow:0 6px 22px rgba(2,6,23,0.6);  }
+    box-shadow:0 6px 22px rgba(2,6,23,0.6); 
+    z-index: 9999;
+}
+
+

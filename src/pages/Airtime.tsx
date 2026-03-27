@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef} from 'react';
 import { Sidebar, Header } from '@/components/ui-custom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,14 +6,20 @@ import { Label } from '@/components/ui/label';
 import { networks, airtimeAmounts } from '@/data';
 import { cn } from '@/lib/utils';
 import type { Network } from '@/types';
+import { useAuth } from '@/context/AuthContext';
+import { PinModal} from '@/components/ui-custom';
+import { useNavigate } from 'react-router-dom';
 
 export function Airtime() {
+  const { user } = useAuth()
+  const defaultNumber = "0" + user?.phone.slice(-10,);
+  const navigate = useNavigate();
+  const { PinComponent, showPinModal, modalData} = PinModal()
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<Network>('MTN');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(defaultNumber);
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState('');
-
   const handleRecharge = (amount: number) => {
     setSelectedAmount(amount);
     setCustomAmount('');
@@ -24,19 +30,52 @@ export function Airtime() {
     setSelectedAmount(null);
   };
 
-  const handleBuyAirtime = () => {
+  const handleBuyAirtime = async() => {
     const amount = selectedAmount || Number(customAmount);
     if (!phoneNumber || !amount) {
       alert('Please fill in all fields');
       return;
     }
-    alert(`Buying ₦${amount} airtime for ${phoneNumber} on ${selectedNetwork}`);
+    if (!user?.pin_is_set) {
+      navigate('/settings');
+      navigate('/pin');
+      return;
+    } else {
+      showPaymentModal()
+      showPinModal()
+    }
+    
   };
 
   const finalAmount = selectedAmount || Number(customAmount) || 0;
+  const payload = {
+    amount: String(finalAmount),
+    network: selectedNetwork.toLowerCase() !== "9mobile" ? selectedNetwork.toLowerCase() : "etisalat",
+    phone_number: String(phoneNumber),             
+  };
+const bodyDivRef = useRef<HTMLDivElement>(null)
+
+  const hidePaymentModal = () => {
+    if (bodyDivRef.current) {
+      bodyDivRef.current.style.opacity = '1'
+      
+    }
+  }
+    const showPaymentModal = () => {
+    if (bodyDivRef.current) {
+      bodyDivRef.current.style.opacity = '0.5'
+    }
+  }
+  if (!modalData.visible) {
+    hidePaymentModal()
+  }
+  else {
+    showPaymentModal()
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex">
+    <div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex" ref={bodyDivRef}>
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -78,7 +117,8 @@ export function Airtime() {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="Enter phone number"
+                    placeholder="Enter phone number"
+                    maxLength={11}
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                 />
@@ -101,7 +141,7 @@ export function Airtime() {
                     >
                       <p className="font-bold text-slate-800 dark:text-white">₦{amount}</p>
                       <p className="text-xs text-slate-500">Airtime</p>
-                      <Button 
+                      {/* <Button 
                         size="sm" 
                         className={cn(
                           'mt-2 w-full rounded-full text-xs',
@@ -111,7 +151,7 @@ export function Airtime() {
                         )}
                       >
                         RECHARGE NOW
-                      </Button>
+                      </Button> */}
                     </button>
                   ))}
                 </div>
@@ -161,6 +201,9 @@ export function Airtime() {
           </div>
         </main>
       </div>
-    </div>
+      </div>
+      <PinComponent type="airtime" value={payload} />
+      
+      </div>
   );
 }

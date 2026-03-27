@@ -1,26 +1,28 @@
 import { cn } from '@/lib/utils';
-import { mockTransactions } from '@/data';
 import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
-
+import { useAuth } from '@/context/AuthContext';
 interface TransactionListProps {
   limit?: number;
   showViewAll?: boolean;
   className?: string;
 }
 
-export function TransactionList({ 
-  limit = 5, 
+  
+export function TransactionList({
+  limit = 5,
   showViewAll = true,
-  className 
+  className,
 }: TransactionListProps) {
-  const transactions = mockTransactions.slice(0, limit);
-
+  const { user } = useAuth()
+  const displayData =  user?.transactions || []
+  const transactions = displayData.slice(0, limit);
+  const redirect = () => window.location.href = '/transactions'
   return (
     <div className={cn('bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden', className)}>
       <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
         <h2 className="text-lg font-semibold text-slate-800 dark:text-white">Recent Transactions</h2>
         {showViewAll && (
-          <button className="text-sm font-medium text-sky-500 hover:text-sky-600 transition-colors">
+          <button onClick={redirect} className="text-sm font-medium text-sky-500 hover:text-sky-600 transition-colors">
             View All
           </button>
         )}
@@ -51,11 +53,11 @@ export function TransactionList({
                   <div className="flex items-center gap-3">
                     <div className={cn(
                       'w-8 h-8 rounded-full flex items-center justify-center',
-                      transaction.type === 'credit' 
+                      transaction.transaction_type === 'CREDIT' 
                         ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
                         : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
                     )}>
-                      {transaction.type === 'credit' ? (
+                      {transaction.transaction_type === 'CREDIT' ? (
                         <ArrowDownLeft className="w-4 h-4" />
                       ) : (
                         <ArrowUpRight className="w-4 h-4" />
@@ -67,19 +69,15 @@ export function TransactionList({
                   </div>
                 </td>
                 <td className="px-4 py-4 text-sm text-slate-500 dark:text-slate-400">
-                  {new Date(transaction.date).toLocaleDateString('en-NG', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
+                  {transaction.created_at.slice(0, 10)}
                 </td>
                 <td className={cn(
                   'px-4 py-4 text-right font-medium',
-                  transaction.type === 'credit'
+                  transaction.transaction_type === 'CREDIT'
                     ? 'text-green-600 dark:text-green-400'
                     : 'text-red-600 dark:text-red-400'
                 )}>
-                  {transaction.type === 'credit' ? '+' : '-'}₦{transaction.amount.toLocaleString()}
+                  {transaction.transaction_type === 'CREDIT' ? '+' : '-'}₦{transaction.amount}
                 </td>
               </tr>
             ))}

@@ -3,24 +3,26 @@ import Cookies from 'js-cookie'
   
 // User Types
 export interface User {
-  id: string; 
+  id?: string; 
   email: string;
    firstName: string;
   surname: string;
   phone: string;
   profilePicture?: string;
   balance: string;
+  pin_is_set: boolean;
+  transactions: Array<Transaction>;
   // bluePoints: number;
 }
 
 // Transaction Types
 export interface Transaction {
-  id: string;
-  description: string;
-  date: string;
-  amount: number;
-  type: 'credit' | 'debit';
-  status: 'pending' | 'completed' | 'failed';
+    id: number;
+    description: string;
+    created_at: string;
+    amount: number;
+    transaction_type: 'CREDIT' | 'DEBIT';
+    status: string;
 }
 
 // Network Types
@@ -232,35 +234,38 @@ export const ENDPOINTS = {
 };
 
 // Save Access Token In Cookie
-export function setCookie(name:string,token:string) {
-  Cookies.set(name, token, {
+export function setCookie(name:string,TOKEN:string) {
+  Cookies.set(name, TOKEN, {
     expires: 1,
-    path: '',
-    secure: true,
-    sameSite:'strict'
+    path: '/',
+    secure: false,
+    sameSite:'strict',
   })
+  
 }
 
 // Get Cookie
-export function getCookie(name:string) {
-  return Cookies.get(name)
+function getCookie(name:string){
+  const cookie:string|undefined = Cookies.get(name);
+    return cookie
 }
 
+export const TOKEN:string = getCookie('access_token') || ''
 
 // Delete Cookie
  export function deleteCookie(name:string) {
-   Cookies.remove(name, { path: '' });
+   Cookies.remove(name, { path: '/' });
   }
 
 
 // GET REQUEST
-export async function getRequest(url: string, token:string) {
-  
+export async function getRequest(url: string) {
+
   try {
     const response = await axios.get(url,
       {
         headers: {
-          "Authorization": `Bearer ${token}`,
+          "Authorization": `Bearer ${TOKEN}`,
           "Content-Type": "application/json",
           "Accept": 'application/json'
         }
@@ -272,13 +277,12 @@ export async function getRequest(url: string, token:string) {
 }
 
 // POST REQUEST
-export async function postRequest(url: string,token:string, payload: object) {
-    
+export async function postRequest(url: string, payload: object) {
   try {
     const response = await axios.post(url,payload,
       {
         headers: {
-          "Authorization": `Bearer ${token}`,
+          "Authorization": `Bearer ${TOKEN}`,
           "Content-Type": "application/json",
           "Accept": 'application/json'
         }
@@ -286,18 +290,16 @@ export async function postRequest(url: string,token:string, payload: object) {
       });
     return response.data
   } catch (error) {
-    const response = error.response
-    return response.data
+      return error?.response?.data
   }
 }
 // POST REQUEST (FILES)
-export async function postFileRequest(url: string,token:string ,payload: object) {
-    
+export async function postFileRequest(url: string,payload: object) {
   try {
     const response = await axios.post(url,payload,
       {
         headers: {
-          "Authorization": `Bearer ${token}`,
+          "Authorization": `Bearer ${TOKEN}`,
         },
       });
     return response.data
@@ -307,12 +309,12 @@ export async function postFileRequest(url: string,token:string ,payload: object)
 }
 
 // PUT REQUEST
-export async function putRequest(url: string, token:string,payload: object) {
+export async function putRequest(url: string, payload: object) {
   try {
     const response = await axios.put(url,payload,
       {
         headers: {
-          "Authorization": `Bearer ${token}`,
+          "Authorization": `Bearer ${TOKEN}`,
           "Content-Type": "application/json",
           "Accept": 'application/json'
         }
