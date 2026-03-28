@@ -36,12 +36,12 @@ export function Airtime() {
       alert('Please fill in all fields');
       return;
     }
-    if (!user?.pin_is_set) {
+    else if (!user?.pin_is_set) {
       navigate('/settings');
       navigate('/pin');
       return;
     } else {
-      showPaymentModal()
+      
       showPinModal()
     }
     

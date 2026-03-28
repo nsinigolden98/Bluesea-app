@@ -354,13 +354,12 @@ export function AuthPage() {
                 </div>
               )}
            
-              <ToastComponent></ToastComponent>
               {/* Submit Button */}
               <Button 
                 type="submit" 
                 className="w-full rounded-xl bg-sky-500 hover:bg-sky-600 h-11 font-medium"
                 // disabled={loading}
-              >
+                >
                 { mode === 'login' ? 'Log in' : 'Sign up'}
               </Button>
             </form>
@@ -368,6 +367,7 @@ export function AuthPage() {
         </div>
       </div>
       </div>
+                <ToastComponent/>
         <LoaderComponent/>
       <ModalComponent />
       </div>

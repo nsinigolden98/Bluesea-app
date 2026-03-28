@@ -1,42 +1,81 @@
-import { useState } from 'react';
-import { Sidebar, Header } from '@/components/ui-custom';
+import { useState, useRef } from 'react';
+import { Sidebar, Header, PinModal } from '@/components/ui-custom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { networks, dataPlans } from '@/data';
+import { networks, dataPlanFunction } from '@/data';
 import { cn } from '@/lib/utils';
 import type { Network, DataPlan } from '@/types';
+import { useAuth } from '@/context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-type PlanType = 'daily' | 'weekly' | 'monthly' | 'xtravalue';
+type PlanType = 'Daily' | 'Weekly' | 'Monthly' | 'Extravalue';
 
 const planTypes: { value: PlanType; label: string }[] = [
-  { value: 'daily', label: 'Daily' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'xtravalue', label: 'Xtravalue' },
+  { value: 'Daily', label: 'Daily' },
+  { value: 'Weekly', label: 'Weekly' },
+  { value: 'Monthly', label: 'Monthly' },
+  { value: 'Extravalue', label: 'Extravalue' },
 ];
 
 export function Data() {
+  const { user } = useAuth();
+  const defaultNumber = "0" + user?.phone.slice(-10,);
+  const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<Network>('MTN');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [selectedPlanType, setSelectedPlanType] = useState<PlanType>('daily');
+  const [phoneNumber, setPhoneNumber] = useState(defaultNumber);
+  const [selectedPlanType, setSelectedPlanType] = useState<PlanType>('Daily');
   const [selectedPlan, setSelectedPlan] = useState<DataPlan | null>(null);
+  const { PinComponent, modalData, showPinModal } = PinModal()
+  
+  const dataPlans = dataPlanFunction()
 
   const filteredPlans = dataPlans.filter(
     plan => plan.network === selectedNetwork && plan.planType === selectedPlanType
   );
+  const payload = {
+    plan: selectedPlan?.description,
+    billersCode: phoneNumber,
+    phone_number: phoneNumber //defaultNumber
+  }
 
   const handleBuyData = () => {
     if (!phoneNumber || !selectedPlan) {
       alert('Please fill in all fields');
       return;
+    }else if (!user?.pin_is_set) {
+      navigate('/settings');
+      navigate('/pin');
+      return;
+    } else {
+      console.log(payload)
+      showPinModal()
     }
-    alert(`Buying ${selectedPlan.size} data plan for ${phoneNumber} on ${selectedNetwork}`);
   };
 
+  const bodyDivRef = useRef<HTMLDivElement>(null)
+  
+    const hidePaymentModal = () => {
+      if (bodyDivRef.current) {
+        bodyDivRef.current.style.opacity = '1'
+        
+      }
+    }
+      const showPaymentModal = () => {
+      if (bodyDivRef.current) {
+        bodyDivRef.current.style.opacity = '0.5'
+      }
+    }
+    if (!modalData.visible) {
+      hidePaymentModal()
+    }
+    else {
+      showPaymentModal()
+    }
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex">
+    <div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex" ref={bodyDivRef}>
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -77,7 +116,8 @@ export function Data() {
                 <Label htmlFor="phone">Recipient's Phone Number</Label>
                 <Input
                   id="phone"
-                  type="tel"
+                    type="tel"
+                    maxLength={11}
                   placeholder="Enter phone number"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
@@ -165,6 +205,8 @@ export function Data() {
           </div>
         </main>
       </div>
-    </div>
+      </div>
+      <PinComponent type={`data-${selectedPlan?.network}`} value={payload} />
+      </div>
   );
 }

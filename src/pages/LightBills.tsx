@@ -81,8 +81,12 @@ export function LightBills() {
       }
       const response = await postRequest(ENDPOINTS.electricity_user, data)
       hideLoader()
-      setCustomer(`Customer: ${response.response.Customer_Name}`)
-      showPinModal();
+      if (response.success) {
+        setCustomer(`Customer: ${response.response.Customer_Name}`)
+        showPinModal();
+      } else {
+        showToast(response.error)
+      };
 
     }
   };

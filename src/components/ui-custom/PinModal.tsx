@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { ENDPOINTS, postRequest } from '@/types';
 import { Input } from '@/components/ui/input';
-import { Loader, Toast } from '@/components/ui-custom'
+import { Loader, TransactionModal } from '@/components/ui-custom'
 import  './PinModal.css'
 
 interface PinComponentProps {
@@ -15,7 +15,7 @@ export function PinModal() {
     visible: false,
   });
   const { showLoader, hideLoader, LoaderComponent } = Loader();
-  const {ToastComponent, showToast} = Toast()
+  
   const showPinModal = useCallback(() => {
     setModalData({visible: true });
   }, []);
@@ -24,33 +24,56 @@ export function PinModal() {
     setModalData({ visible: false });
     
   }, []);
+
   
 
   async function completeTransaction(type: string, value: object) {
-     
+    let response = undefined;
+    
       if (type === 'airtime') {
-        const response = await postRequest(ENDPOINTS.buy_airtime, value)
-        return response.response_description || response.error  
-    }
-   else if (type === 'light') {
-        const response = await postRequest(ENDPOINTS.electricity, value);
-        return response.response_description || response.error  
-    }
+        response = await postRequest(ENDPOINTS.buy_airtime, value)  
+     }   else if (type === 'light') {
+         response = await postRequest(ENDPOINTS.electricity, value);
+          
+      } else if (type === 'data-MTN') {
+      response = await postRequest(ENDPOINTS.buy_mtn, value);
+        
+      } else if (type === 'data-Glo') {
+      response = await postRequest(ENDPOINTS.buy_glo, value);
+       
+      } else if (type === 'data-Airtel') {
+        response = await postRequest(ENDPOINTS.buy_airtel, value);
+        
+      } else if (type === 'data-9mobile') {
+        response = await postRequest(ENDPOINTS.buy_etisalat, value);   
+      }
+    return response
 
   };
 
 
+  const [txStatus, setTxStatus] = useState<boolean | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
     const PinComponent = ({type,value}:PinComponentProps) => {
     const [pin, setPin] = useState('');
-    
 
       const makeTransaction = useCallback(async (type: string, pin: string, value: object) => {
-            showLoader();
-            const message =await completeTransaction(type, { ...value, transaction_pin: pin });
-            hidePinModal();
-        hideLoader();
-        console.log(message)
-        showToast(message)
+        showLoader();
+        setIsOpen(true)
+        setTxStatus(null)
+        const response = await completeTransaction(type, { ...value, transaction_pin: pin });
+        hidePinModal();
+         hideLoader();
+        if (response.success || response.code === '000') {
+          setTxStatus(true)
+          setIsOpen(false)
+        } else {
+          setTxStatus(false)
+          setIsOpen(false)
+        }
+        console.log(response);
+       
+        
       },[])
     
       if (!modalData.visible) return null
@@ -63,7 +86,7 @@ export function PinModal() {
             <div id="create-pin-form">
                 <div className="input-group">
                     
-            <Input type="password" id="pin" placeholder="••••" maxLength={4} inputMode="numeric" value={pin} onChange={(e)=> setPin(e.target.value)}
+            <Input  className='password' type="password" id="pin" placeholder="••••" maxLength={4} inputMode="numeric" value={pin} onChange={(e)=> setPin(e.target.value)}
             />
                 </div>
 
@@ -71,8 +94,14 @@ export function PinModal() {
             onClick={()=>makeTransaction(type,pin,value,)}>CONFIRM </button>
                 <button id='cancel-payment'  className="btn  btn-primary" onClick={hidePinModal}>CANCEL </button>
             </div>
-            <ToastComponent/>
-          </div>
+            
+             
+            
+            </div>
+          {isOpen && (<TransactionModal
+            isSuccess={txStatus}
+            onClose={() => setIsOpen(false)}
+            />)}
           <LoaderComponent />
         </div>
     )

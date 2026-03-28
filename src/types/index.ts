@@ -30,12 +30,13 @@ export type Network = 'MTN' | 'Glo' | 'Airtel' | '9mobile';
 
 // Data Plan Types
 export interface DataPlan {
-  id: string;
-  size: string;
+  id: string ;
+  size: string ;
   price: number;
   validity: string;
   network: Network;
-  planType: 'daily' | 'weekly' | 'monthly' | 'xtravalue';
+  planType: 'Daily' | 'Weekly' | 'Monthly' | 'Extravalue';
+  description: string;
 }
 
 // Service Types
