@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback} from 'react';
 import { ENDPOINTS, postRequest } from '@/types';
 import { Input } from '@/components/ui/input';
-import { Loader, TransactionModal } from '@/components/ui-custom'
+import { Loader } from '@/components/ui-custom'
 import  './PinModal.css'
 
 interface PinComponentProps {
@@ -9,12 +9,21 @@ interface PinComponentProps {
   value: object;
 }
 
+interface Message {
+  success?: boolean;
+  code?: string;
+  response_description?: string;
+  error?: string;
+}
 
 export function PinModal() {
   const [modalData, setModalData] = useState<{ visible: boolean }>({
     visible: false,
   });
   const { showLoader, hideLoader, LoaderComponent } = Loader();
+  const [message, setMessage] = useState<Message>();
+  
+  
   
   const showPinModal = useCallback(() => {
     setModalData({visible: true });
@@ -50,35 +59,29 @@ export function PinModal() {
     return response
 
   };
+ 
+    
 
 
-  const [txStatus, setTxStatus] = useState<boolean | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
-    const PinComponent = ({type,value}:PinComponentProps) => {
+
+  const PinComponent = ({type,value}:PinComponentProps) => {
     const [pin, setPin] = useState('');
-
-      const makeTransaction = useCallback(async (type: string, pin: string, value: object) => {
-        showLoader();
-        setIsOpen(true)
-        setTxStatus(null)
+    
+    const makeTransaction = async (type: string, pin: string, value: object) => {
+      
+      showLoader();
+      
         const response = await completeTransaction(type, { ...value, transaction_pin: pin });
         hidePinModal();
-         hideLoader();
-        if (response.success || response.code === '000') {
-          setTxStatus(true)
-          setIsOpen(false)
-        } else {
-          setTxStatus(false)
-          setIsOpen(false)
-        }
-        console.log(response);
-       
-        
-      },[])
+        hideLoader();
+      setMessage(response);
+    }
+      
     
       if (!modalData.visible) return null
 
-      return (
+    return (
+        
       <div>
       <div id="pin-creation-step" className="form-card active-step">
             <h2> Enter PIN</h2>
@@ -98,13 +101,9 @@ export function PinModal() {
              
             
             </div>
-          {isOpen && (<TransactionModal
-            isSuccess={txStatus}
-            onClose={() => setIsOpen(false)}
-            />)}
-          <LoaderComponent />
+        <LoaderComponent />
         </div>
     )
   };
-  return { showPinModal, hidePinModal, PinComponent, modalData};
+  return { showPinModal, hidePinModal, PinComponent, modalData, message};
 }

@@ -1,5 +1,5 @@
-import { useState, useRef} from 'react';
-import { Sidebar, Header } from '@/components/ui-custom';
+import { useState, useRef, useEffect} from 'react';
+import { Sidebar, Header, TransactionModal, PinModal, Toast} from '@/components/ui-custom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,19 +7,24 @@ import { networks, airtimeAmounts } from '@/data';
 import { cn } from '@/lib/utils';
 import type { Network } from '@/types';
 import { useAuth } from '@/context/AuthContext';
-import { PinModal} from '@/components/ui-custom';
 import { useNavigate } from 'react-router-dom';
 
 export function Airtime() {
   const { user } = useAuth()
   const defaultNumber = "0" + user?.phone.slice(-10,);
   const navigate = useNavigate();
-  const { PinComponent, showPinModal, modalData} = PinModal()
+  const { PinComponent, showPinModal, modalData, message} = PinModal()
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<Network>('MTN');
   const [phoneNumber, setPhoneNumber] = useState(defaultNumber);
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState('');
+  const { showToast, ToastComponent } = Toast()
+  const [isOpen, setIsOpen] = useState(false);
+  const [txStatus, setTxStatus] = useState<boolean | null>(null);
+  const [toastMessage, setToastMessage] = useState('')
+
+
   const handleRecharge = (amount: number) => {
     setSelectedAmount(amount);
     setCustomAmount('');
@@ -73,6 +78,27 @@ const bodyDivRef = useRef<HTMLDivElement>(null)
     showPaymentModal()
   }
 
+  useEffect(() => {
+        
+      if (message) {
+        console.log(message)
+        setIsOpen(true)
+        
+        if (message?.success || message?.code === '000') {
+          showToast(message?.response_description || '')
+          setToastMessage(message?.response_description || '')
+          setTxStatus(true)
+        } else {
+          showToast(message?.error|| message?.response_description || '')
+          setToastMessage(message?.error || message?.response_description || '')
+          setTxStatus(false)
+        }
+          
+      } else {
+        return
+      };
+    }, [message, showToast]);
+      
   return (
     <div>
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex" ref={bodyDivRef}>
@@ -203,7 +229,9 @@ const bodyDivRef = useRef<HTMLDivElement>(null)
       </div>
       </div>
       <PinComponent type="airtime" value={payload} />
-      
+      <ToastComponent />
+      { isOpen &&(
+        <TransactionModal isSuccess={txStatus} onClose={()=> setIsOpen(false)} toastMessage={toastMessage} />)}
       </div>
   );
 }

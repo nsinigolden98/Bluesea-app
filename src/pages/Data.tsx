@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { Sidebar, Header, PinModal } from '@/components/ui-custom';
+import { useState, useRef, useEffect} from 'react';
+import { Sidebar, Header, PinModal, TransactionModal, Toast } from '@/components/ui-custom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,7 +27,11 @@ export function Data() {
   const [phoneNumber, setPhoneNumber] = useState(defaultNumber);
   const [selectedPlanType, setSelectedPlanType] = useState<PlanType>('Daily');
   const [selectedPlan, setSelectedPlan] = useState<DataPlan | null>(null);
-  const { PinComponent, modalData, showPinModal } = PinModal()
+  const { PinComponent, modalData, showPinModal, message } = PinModal();
+   const { showToast, ToastComponent } = Toast()
+  const [isOpen, setIsOpen] = useState(false);
+  const [txStatus, setTxStatus] = useState<boolean | null>(null);
+  const [toastMessage, setToastMessage] = useState('')
   
   const dataPlans = dataPlanFunction()
 
@@ -73,6 +77,28 @@ export function Data() {
     else {
       showPaymentModal()
     }
+  
+   useEffect(() => {
+          
+        if (message) {
+          console.log(message)
+          setIsOpen(true)
+          
+          if (message?.success || message?.code === '000') {
+            showToast(message?.response_description || '')
+            setToastMessage(message?.response_description || '')
+            setTxStatus(true)
+          } else {
+            showToast(message?.error|| message?.response_description || '')
+            setToastMessage(message?.error || message?.response_description || '')
+            setTxStatus(false)
+          }
+            
+        } else {
+          return
+        };
+      }, [message, showToast]);
+  
   return (
     <div>
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex" ref={bodyDivRef}>
@@ -207,6 +233,9 @@ export function Data() {
       </div>
       </div>
       <PinComponent type={`data-${selectedPlan?.network}`} value={payload} />
+      <ToastComponent />
+      { isOpen &&(
+        <TransactionModal isSuccess={txStatus} onClose={()=> setIsOpen(false)} toastMessage={toastMessage} />)}
       </div>
   );
 }

@@ -1,10 +1,10 @@
-import { useState, useRef } from 'react';
-import { Sidebar, Header} from '@/components/ui-custom';
+import { useState, useRef, useEffect } from 'react';
+import { Sidebar, Header, Toast, TransactionModal, PinModal, Loader} from '@/components/ui-custom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Toast, PinModal, Loader } from '@/components/ui-custom'
+
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ENDPOINTS, postRequest } from '@/types';
@@ -38,7 +38,7 @@ const BILLER_NAME:BillerName = {
   'Aba Electric(ABA)': 'aba-electric',
   'Yola Electric(YEDC)': 'yola-electric'
 };
-const billers = Object.keys(BILLER_NAME);
+const billers = Object.keys(BILLER_NAME); 
 
 export function LightBills() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -46,12 +46,16 @@ export function LightBills() {
   const [meterType, setMeterType] = useState('');
   const [biller, setBiller] = useState('');
   const [amount, setAmount] = useState('');
-  const { showToast, ToastComponent } = Toast();
-  const { PinComponent, showPinModal, modalData } = PinModal()
+  const { PinComponent, showPinModal, modalData, message } = PinModal()
   const { user } = useAuth()
   const {LoaderComponent, showLoader, hideLoader}= Loader()
   const navigate = useNavigate()
   const [customer, setCustomer] = useState('')
+  const { showToast, ToastComponent } = Toast()
+  const [isOpen, setIsOpen] = useState(false);
+  const [txStatus, setTxStatus] = useState<boolean | null>(null);
+  const [toastMessage, setToastMessage] = useState('')
+
 
   const pricePerUnit = 70;
   const units = amount ? Math.floor(Number(amount) / pricePerUnit) : 0;
@@ -110,6 +114,26 @@ export function LightBills() {
     showPaymentModal()
   }
 
+   useEffect(() => {
+          
+        if (message) {
+          console.log(message)
+          setIsOpen(true)
+          
+          if (message?.success || message?.code === '000') {
+            showToast(message?.response_description || '')
+            setToastMessage(message?.response_description || '')
+            setTxStatus(true)
+          } else {
+            showToast(message?.error|| message?.response_description || '')
+            setToastMessage(message?.error || message?.response_description || '')
+            setTxStatus(false)
+          }
+            
+        } else {
+          return
+        };
+      }, [message, showToast]);
   
   return (
     <div>
@@ -232,9 +256,11 @@ export function LightBills() {
         </main>
       </div>
       </div>
-      <LoaderComponent/>
+      <LoaderComponent />
+       <PinComponent type="light" value={payload} />
       <ToastComponent />
-      <PinComponent type='light' value={payload}/>
+      { isOpen &&(
+        <TransactionModal isSuccess={txStatus} onClose={()=> setIsOpen(false)} toastMessage={toastMessage} />)}
       </div>
   );
 }

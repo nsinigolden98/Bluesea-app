@@ -23,18 +23,22 @@ export function Toast() {
         {toastData.msg}
       </div>
     );
+  
+
   };
 
   return { showToast, ToastComponent };
 }
 
 
+
 interface TransactionModalProps {
   isSuccess: boolean | null; // null: processing, true: success, false: failure
   onClose: () => void;
+  toastMessage: string;
 }
 
-export const TransactionModal: React.FC<TransactionModalProps> = ({ isSuccess, onClose }) => {
+export const TransactionModal: React.FC<TransactionModalProps> = ({ isSuccess, onClose,toastMessage }) => {
   const [statusText, setStatusText] = useState("Securing your transaction…");
   const [isDone, setIsDone] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
@@ -115,7 +119,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isSuccess, o
           </div>
 
           <h1 className="headline">
-            {isSuccess === null ? "Processing..." : isSuccess ? "Success!" : "Failed"}
+            {isSuccess === null ? "Processing..." : toastMessage}
           </h1>
 
           <ul className={`conf-list ${isDone ? 'visible' : ''}`}>
