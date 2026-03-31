@@ -13,10 +13,19 @@ import {
 } from '@/types';
 import { useGoogleLogin, type TokenResponse } from '@react-oauth/google'
 import { TransactionsData } from '@/data';
-import {TOKEN} from '@/types'
+import { TOKEN } from '@/types'
+
+ interface SignUpResponse {
+    state: boolean;
+   message: string;
+   errors: {
+     email:Array<null>;
+   };
+};
+
 interface AuthContextType extends AuthState {
   login: (data: LoginFormData) => Promise<string>;
-  signup: (data: SignupFormData) => Promise<boolean>;
+  signup: (data: SignupFormData) => Promise<SignUpResponse>;
   logout: () => void;
   googleLogin: () => void;
   load?: () => void;
@@ -81,7 +90,7 @@ useEffect( () => {
 
     deleteCookie('access_token')
     deleteCookie('refresh_token')
-    const response = await postRequest(ENDPOINTS.login,_data)
+    const response = await postRequest(ENDPOINTS.login, _data)
     if (response.detail === undefined) {
       // if (_data.rememberMe) {
       //   setCookie('email', _data.email)
@@ -89,7 +98,7 @@ useEffect( () => {
       // }
       if (response.user.email_verified) {
          setCookie('access_token',response.access_token);
-        setCookie('refresh_token', response.refresh_token); 
+         setCookie('refresh_token', response.refresh_token); 
         
         const get_user = await getRequest(ENDPOINTS.user);
         const get_balance = await getRequest(ENDPOINTS.balance);
@@ -112,15 +121,7 @@ useEffect( () => {
         });
         
         return 'Login Successful. Redirecting ...'
-          } else{
-         await postRequest(ENDPOINTS.sendOtp,{ email: _data.email });
-          setState({
-            isAuthenticated: false,
-            user: null,
-            loading: false,
-          });
-        return 'Verify Account'
-         }    
+          } 
     } else {
     setState({
           isAuthenticated: false,
@@ -128,21 +129,36 @@ useEffect( () => {
           loading: false,
     });
       return response.detail
-      
     }
       
   }, []);
 
   const signup = useCallback(async (data: SignupFormData) => {
     setState(prev => ({ ...prev, loading: true }));
+
+    const user: User = {
+      email: data.email,
+      phone: data.phone,
+      firstName: data.firstName,
+      surname: data.surname,
+      balance: "0",
+      transactions: [],
+      pin_is_set: false,
+    }
     setState({
         isAuthenticated: false,
-        user: null,
+        user: user,
         loading: false,
            });
-      
-    const response = await postRequest(ENDPOINTS.signup, data);
-    return response.state
+    const payload = {
+      email: data.email,
+      phone: String(data.phone),
+      other_names: data.firstName,
+      surname: data.surname,
+      password: data.surname
+    };
+    const response = await postRequest(ENDPOINTS.signup, payload);
+    return response
     
   }, []);
 

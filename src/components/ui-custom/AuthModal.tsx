@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { postRequest, ENDPOINTS } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import './AuthModal.css';
-
+import {Toast, Loader} from '@/components/ui-custom'
+import { Input } from '@/components/ui/input';
 
 export function ForgotPasswordModal() {
   const [toastData, setToastData] = useState<{ msg: string; visible: boolean }>({
@@ -27,70 +28,118 @@ export function ForgotPasswordModal() {
       </div>
     );
   };
-
+ 
   return { showToast, ToastComponent };
 }
 
-export function AuthEmailModal() {
-  const [modalData, setModalData] = useState<{ visible: boolean }>({
-    visible: false,
-  });
 
-  const showModal = useCallback(() => {
-    setModalData({visible: true });
-  }, []);
-  const hideModal = useCallback(() => {
-    
-    setModalData({visible: false });
-  }, []);
 
-  const ModalComponent = () => {
+export const AuthEmailModal = () => {
+
+  const [visibility, setComponentVisibilty] = useState<boolean>(false);
   
-    const {user} = useAuth()
-    const [otp, setOTP] = useState('')
-    const verifyEmailOTP = async() => {
-      await postRequest(ENDPOINTS.sendOtp, { email:user?.email })
-    }
-    if (!modalData.visible) {
-      return null
+  const AuthComponent = () => {
+  const { showLoader, hideLoader, LoaderComponent } = Loader();
+  const { showToast, ToastComponent } = Toast();
+
+  
+  
+    const [count, setCount] = useState(60);
+    const [isCounting, setIsCounting] = useState(true);
+    const { user } = useAuth();
+   
+  
+    const verifyEmailOTP = async (otp:string) => {
+      showLoader()
+      const verifyResponse = await postRequest(ENDPOINTS.verifyOtp, { email: user?.email, otp: Number(otp) });
+      console.log(verifyResponse);
+      hideLoader()
+      if (verifyResponse.state) {
+        showToast(verifyResponse.message)
+        setTimeout(()=>{ setComponentVisibilty(false)},3000)
+       
+      }
+      else {
+        showToast(verifyResponse.message)
+      }
     };
-    return (
-       <div className="modal_panel" id="modal_panel">
-      <button className="modal_close" id="modal_close" aria-label="Close" onClick={hideModal}>✕</button>
-      <h2 id="modal_title" className="modal_title">Verify Account</h2>
+  const resendOTP = async () => {
+    await postRequest(ENDPOINTS.sendOtp, { email: user?.email }) 
+    setIsCounting(true);
+    setCount(60);
+  };
+  useEffect(() => {
+    let interval = undefined;
+    
+      if (isCounting && count > 0) {
+        interval = setInterval(() => {
+          setCount((prev)=> prev - 1)
+        }, 1000)
+      } else if (count === 0) {
+        setIsCounting(false);
+        clearInterval(interval);
+      }
+      
+    return ()=> clearInterval(interval)
+  }, [count, isCounting]);
+  
+     const [otp, setOTP] = useState('');
+  
+    if (visibility) {
+      return (
+
+        <div className='modalBody'>
+
+          <div className="modal_panel dark:bg-slate-600 dark:text-white" id="modal_panel">
+            <button className="modal_close dark:text-white" id="modal_close" aria-label="Close"
+              onClick={() => setComponentVisibilty(false)}
+            > X </button>
+            <h1 id="modal_title" className="modal_title">Verify Account</h1>
         
-      <div className='modal_body'>
-        <div className="modal_panel_item email_modal" id="email_modal" data-panel="email" aria-hidden="false">
-          <p className="small">We sent a 6-digit code to your email. Enter it below.</p>
-          <div className="field">
+            <div className='modal_body'>
+              <div className="modal_panel_item email_modal" id="email_modal" data-panel="email" aria-hidden="false">
+                <p className="small">We sent a 6-digit code to your email. Enter it below.</p>
+                <div className="field">
 
-            <label htmlFor='otp'>Email OTP</label>
+                  <label htmlFor='otp'className='otp'>Email OTP</label>
             
-              <input id="modal_email_otp"
-                className="input"
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
-                onChange={(e) => setOTP(e.target.value)}
-                placeholder="Enter email OTP"
-                value={otp}
-                required />
+                  <Input id="modal_email_otp"
+                    className="input"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    onChange={(e) => setOTP(e.target.value)}
+                    placeholder="Enter email OTP"
+                    value={otp}
+                    required
+                   />
             
-            <div id="modal_email_error" className="error" aria-live="polite"></div>
-          </div>
-          <div className="row modal_actions">
+                </div>
+                <div className="row modal_actions">
 
-            <button id="modal_verify_email" onClick={verifyEmailOTP} className="btn"  type="button">Verify Email OTP</button> 
-            <button id="modal_resend_email" className="btn" type="button">Resend (<span id="modal_timer_email">50</span>s)</button>
+                  <button id="modal_verify_email" onClick={() => { verifyEmailOTP(otp) }} className=" rounded-xl bg-sky-500 hover:bg-sky-600 h-8 text-sm px-3 mx-2" type="button">Verify Email OTP</button>
+                  <button id="modal_resend_email" className="rounded-xl bg-sky-500 hover:bg-sky-600 h-8 text-sm px-3 mx-2" type="button"
+                    onClick={resendOTP} disabled={isCounting}
+                  >Resend
+                    {isCounting ? (
+                      <span id="modal_timer_email">({count}s)</span>
+                    ):(
+                    <span></span>
+                  )}</button>
+                </div>
+              </div>
+            </div>
           </div>
+          <ToastComponent />
+          <LoaderComponent />
         </div>
-        </div>
-      </div>
-    );
+      );
+    }
+  }
+  return {AuthComponent, setComponentVisibilty}
   };
 
-  return { showModal, hideModal,ModalComponent, modalData };
-}
+
 
 
 

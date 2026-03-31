@@ -14,34 +14,45 @@
   --card-width: 520px;
 }
 
-*{
-    box-sizing:border-box;
+.modalBody{
+  top: 1px;
+  background-color: transparent;
+  position: fixed;
+  width:100%;
+  height: 100%;
+  bottom:1px;
 }
-   
 /* Forgot Password and sign up*/
 .forgot_modal, .modal_panel{
     background:var(--card); 
     border-radius:12px; 
     border:1px solid var(--border);
-    top:100px;
-    position: absolute;
-    width:90%;
-    padding: 20px;
-    margin: auto 0;
+    top:25%;
+     position:fixed;
+    left:50%; 
+    font-weight: bold;
+    transform:translateX(-50%); 
+    width:80%;
+    padding:35px; 
+    z-index: 9999;
+    
 }
 .forgot_modal_title, .modal_title{
     margin:0 0 8px 0; 
     font-size:18px;
-    color: #0b1720; }
+    padding:10px;
+}
     
 .forgot_modal_close, .modal_close {
     position:absolute; 
     right:12px; 
     top:12px; 
     border:0; 
+    font-weight: 800;
     background:transparent; 
     cursor:pointer; 
-    font-size:16px; 
+    font-size:35px;
+    margin:10px; 
     color:var(--muted) }
 
 
@@ -52,16 +63,13 @@
 .input {
   width: 100%;
   padding: 12px 14px;
-  background: var(--input-bg);
   border-radius: 8px;
   border: 1px solid var(--border);
-  color: var(--text);
   font-size: 14px;
   outline: none;
   transition: box-shadow var(--dur-fast), border-color var(--dur-fast);
 }
 .input::placeholder {
-  color: var(--muted);
   opacity: 0.9;
 }
 
@@ -161,35 +169,7 @@
   border-radius: 4px;
 }
 
-/* Buttons */
-.btn {
-  display: inline;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
-  transition: all var(--dur-fast);
-}
-.btn_primary {
-  background:#0ea5e9 ;
-  color: #fff;
-  width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 6px 18px rgba(14, 165, 233, 0.12);
-}
-.btn_primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.15);
-}
-.btn:active {
-  transform: scale(0.995);
-}
+
 
 /* divider */
 .divider {
@@ -212,7 +192,6 @@
 
 /* small text */
 .small {
-  color: var(--muted);
   font-size: 13px;
 }
 

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Logo,Toast, AuthEmailModal, Loader,AuthLoader } from '@/components/ui-custom';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { Eye, EyeOff, Lock, Mail, User, Phone } from 'lucide-react';
-import { TOKEN } from '@/types'
+import { TOKEN, postRequest,ENDPOINTS } from '@/types'
 
 // Google Icon Component
 function GoogleIcon({ className }: { className?: string }) {
@@ -23,46 +23,22 @@ function GoogleIcon({ className }: { className?: string }) {
 }
 
 
-function normalizeNigeriaPhone(raw:string|undefined) {
-  if (!raw) return null;
-  let s = raw.trim().replace(/\s+/g, "");
-  // strip non-digits except leading +
-  if (s.startsWith("+")) {
-    s = "+" + s.slice(1).replace(/\D/g, "");
-  } else {
-    s = s.replace(/\D/g, "");
-  }
-
-  // local 0XXXXXXXXXX (11)
-  if (/^0\d{10}$/.test(s)) {
-    const second = s[1];
-    if (!/[789]/.test(second)) return null;
-    return `+234${s.slice(1)}`;
-  }
-  // +234XXXXXXXXXX
-  if (/^\+234\d{10}$/.test(s)) {
-    const firstAfter = s[4];
-    if (!/[789]/.test(firstAfter)) return null;
-    return s;
-  }
-  return null;
-}
 type AuthMode = 'login' | 'signup';
 
 export function AuthPage() {
   const navigate = useNavigate();
-  const { login, signup, googleLogin, loading} = useAuth();
+  const { login, signup, googleLogin, loading } = useAuth();
   const [mode, setMode] = useState<AuthMode>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { showToast, ToastComponent } = Toast()
-  const { showModal, hideModal, ModalComponent, modalData } = AuthEmailModal()
-  const {showLoader, hideLoader, LoaderComponent} =Loader()
+  const { showLoader, hideLoader, LoaderComponent } = Loader()
+  const {AuthComponent, setComponentVisibilty} = AuthEmailModal()
   
   // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState<string>('');
   const [firstName, setFirstName] = useState('');
   const [surname, setSurname] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -74,51 +50,37 @@ export function AuthPage() {
     showLoader()
     
     if (mode === 'login') {
-      const response:string = await login({ email, password, rememberMe });
-      if (response === 'Verify Account') {
-        // continue from here
-        showModal()
-      } else {
-        showToast(response)
-      }
-      
+      const response: string = await login({ email, password, rememberMe });
+      showToast(response);
+    
     } else {
       if (password !== confirmPassword) {
         showToast('Passwords do not match');
       }
-      else{
-        const response: boolean = await signup({ email, phone, firstName, surname, password, confirmPassword, agreeToTerms });
-        if (response) {
-          // Continue from here
-          showModal()
-        } else {
-          showToast("Email Already Registered")
+      else {
+       
+        const response = await signup({ email, phone, firstName, surname, password, confirmPassword, agreeToTerms });
+        
+        if (response.state) {
+          showToast(response.message);
+          // setModalVisiblity(true);
+          setComponentVisibilty(true);
+
+        } else if (response.errors.email[0] === "Email already exists.") {
+          const otpResponse = await postRequest(ENDPOINTS.sendOtp, { email: email });
+          console.log(otpResponse);
+          showToast(otpResponse.message)
+          setComponentVisibilty(true);
+        }
+        else {
+          showToast(response.message)
         }
         navigate('/login');
       }
     }
     hideLoader()
   };
-  const bodyDivRef = useRef<HTMLDivElement>(null)
-
-  const hideSignUpModal = () => {
-    if (bodyDivRef.current) {
-      bodyDivRef.current.style.opacity = '1'
-      
-    }
-  }
-    const showSignUpModal = () => {
-    if (bodyDivRef.current) {
-      bodyDivRef.current.style.opacity = '0.5'
-    }
-  }
-  if (!modalData.visible) {
-    hideSignUpModal()
-  }
-  else {
-    showSignUpModal()
-  }
-    
+ 
   
   return (
     <div>
@@ -128,7 +90,7 @@ export function AuthPage() {
       </div>
       ): (
         <div >
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col" onClick={hideModal}   ref={bodyDivRef}>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col" >
       {/* Header */}
       <div className="p-4 md:p-6">
         <Logo size="sm" />
@@ -227,9 +189,10 @@ export function AuthPage() {
                       id="phone"
                       type="tel"
                       placeholder="0803 123 4567 or +2348031234567"
-                      value={normalizeNigeriaPhone(phone) || undefined}
+                      value= {phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="pl-10 h-11"
+                              className="pl-10 h-11"
+                              maxLength={11}
                       required
                     />
                   </div>
@@ -369,7 +332,7 @@ export function AuthPage() {
       </div>
                 <ToastComponent/>
         <LoaderComponent/>
-      <ModalComponent />
+            <AuthComponent />
       </div>
     )}
       </div>
