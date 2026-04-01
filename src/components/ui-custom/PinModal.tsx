@@ -83,8 +83,8 @@ export function PinModal() {
     return (
         
       <div>
-      <div id="pin-creation-step" className="form-card active-step">
-            <h2> Enter PIN</h2>
+      <div id="pin-creation-step" className="form-card active-step  dark:bg-slate-600 daek:text-white">
+            <h2 className='dark:text-white'> Enter PIN</h2>
 
             <div id="create-pin-form">
                 <div className="input-group">

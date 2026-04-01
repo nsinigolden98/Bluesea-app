@@ -1,35 +1,32 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { postRequest, ENDPOINTS } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import './AuthModal.css';
 import {Toast, Loader} from '@/components/ui-custom'
 import { Input } from '@/components/ui/input';
 
-export function ForgotPasswordModal() {
-  const [toastData, setToastData] = useState<{ msg: string; visible: boolean }>({
-    msg: '',
-    visible: false,
-  });
+export const ForgotPasswordModal=()=> {
+  const [visibility, setForgotPasswordVisibility] = useState<boolean>(false);
 
-  const showToast = useCallback((msg: string, ms = 10000) => {
-    setToastData({ msg, visible: true });
-    
-    setTimeout(() => {
-      setToastData((prev) => ({ ...prev, visible: false }));
-    }, ms);
-  }, []);
+
 
   // This is the component you render in your JSX
-  const ToastComponent = () => {
-    if (!toastData.visible) return null;
+  const ForgotPasswordComponent = () => {
+    const { showLoader, hideLoader, LoaderComponent } = Loader();
+    const { showToast, ToastComponent } = Toast();
+
+
+    if (visibility) return null;
     return (
-      <div className='toast'>
-        {toastData.msg}
+      <div>
+        
+        <ToastComponent />
+        <LoaderComponent />
       </div>
     );
   };
  
-  return { showToast, ToastComponent };
+  return {setForgotPasswordVisibility, ForgotPasswordComponent };
 }
 
 
@@ -52,7 +49,7 @@ export const AuthEmailModal = () => {
     const verifyEmailOTP = async (otp:string) => {
       showLoader()
       const verifyResponse = await postRequest(ENDPOINTS.verifyOtp, { email: user?.email, otp: Number(otp) });
-      console.log(verifyResponse);
+      
       hideLoader()
       if (verifyResponse.state) {
         showToast(verifyResponse.message)

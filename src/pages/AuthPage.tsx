@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { Eye, EyeOff, Lock, Mail, User, Phone } from 'lucide-react';
 import { TOKEN, postRequest,ENDPOINTS } from '@/types'
+import { ForgotPasswordModal } from '@/components/ui-custom/AuthModal';
 
 // Google Icon Component
 function GoogleIcon({ className }: { className?: string }) {
@@ -33,7 +34,8 @@ export function AuthPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { showToast, ToastComponent } = Toast()
   const { showLoader, hideLoader, LoaderComponent } = Loader()
-  const {AuthComponent, setComponentVisibilty} = AuthEmailModal()
+  const { AuthComponent, setComponentVisibilty } = AuthEmailModal()
+  const {setForgotPasswordVisibility, ForgotPasswordComponent} = ForgotPasswordModal
   
   // Form states
   const [email, setEmail] = useState('');
@@ -44,6 +46,7 @@ export function AuthPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -299,7 +302,7 @@ export function AuthPage() {
                       Remember me
                     </Label>
                   </div>
-                  <button type="button" className="text-sm text-sky-500 hover:text-sky-600 font-medium">
+                  <button type="button" className="text-sm text-sky-500 hover:text-sky-600 font-medium" onClick={()=> setForgotPasswordVisibility(true)}>
                     Forgot password?
                   </button>
                 </div>
@@ -331,7 +334,8 @@ export function AuthPage() {
       </div>
       </div>
                 <ToastComponent/>
-        <LoaderComponent/>
+            <LoaderComponent />
+            <ForgotPasswordComponent />
             <AuthComponent />
       </div>
     )}

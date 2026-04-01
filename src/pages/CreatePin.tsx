@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -10,21 +10,21 @@ import { ENDPOINTS, postRequest } from '@/types';
 
 export function CreatePin() {
   const navigate = useNavigate();
-  const { user } = useAuth()
-  const { ToastComponent, showToast } = Toast()
-  const {showLoader, hideLoader, LoaderComponent} = Loader()
+  const { user } = useAuth();
+  const { ToastComponent, showToast } = Toast();
+  const { showLoader, hideLoader, LoaderComponent } = Loader();
   const [pins, setPins] = useState({
-    current: ['', '', '', ''],
+    current:['', '','',''],
     new: ['', '', '', ''],
     confirm: ['', '', '', ''],
   });
   
-  const inputRefs = {
-    current: useRef<(HTMLInputElement | null)[]>([]),
-    new: useRef<(HTMLInputElement | null)[]>([]),
-    confirm: useRef<(HTMLInputElement | null)[]>([]),
-  };
+  
+  const currentPin = useRef<(HTMLInputElement)>(null);
+  const newPin = useRef<HTMLInputElement>(null);
+  const confirmPin = useRef<HTMLInputElement>(null);
 
+  
   const handlePinChange = (
     type: 'current' | 'new' | 'confirm',
     index: number,
@@ -36,10 +36,11 @@ export function CreatePin() {
     newPins[type][index] = value;
     setPins(newPins);
 
-    // Auto-focus next input
-    if (value && index < 3) {
-      inputRefs[type].current[index + 1]?.focus();
+    if (value.length === 1 && index < 3) {
+      document.getElementById(`${type}${index + 1}`).focus();
+      
     }
+    
   };
 
   const handleKeyDown = (
@@ -48,7 +49,10 @@ export function CreatePin() {
     e: React.KeyboardEvent
   ) => {
     if (e.key === 'Backspace' && !pins[type][index] && index > 0) {
-      inputRefs[type].current[index - 1]?.focus();
+      const newPins = { ...pins };
+      newPins[type][index] = '';
+      setPins(newPins);
+      document.getElementById(`${type}${index - 1}`).focus();
     }
   };
 
@@ -68,7 +72,8 @@ export function CreatePin() {
       if (response.state) {
         
         showToast(response.message);
-        navigate(-1);
+        setTimeout(()=>{    navigate(-1);}, 3000)
+        
       } else {
         showToast(response.message);  
       };
@@ -84,7 +89,8 @@ export function CreatePin() {
       if (response.state) {
         
         showToast(response.message);
-        navigate(-1);
+        setTimeout(()=>{    navigate(-1);}, 3000)
+
       } else {
         showToast(response.message);  
       };
@@ -94,46 +100,6 @@ export function CreatePin() {
     hideLoader();
   };
 
-  const PinInput = ({
-    type,
-    label,
-    
-  }: {
-    type: 'current' | 'new' | 'confirm';
-    label: string;
-    
-    }) => {
-    
-    
-  
-  return ( <div className="space-y-3">
-      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-        {label}
-      </label>
-      <div className="flex gap-3 justify-center">
-        {[0, 1, 2, 3].map((index) => (
-          <input
-            key={index}
-            ref={(el) => { inputRefs[type].current[index] = el; }}
-            type="password"
-            inputMode="numeric"
-            maxLength={1}
-            value={pins[type][index]}
-            onChange={(e) => handlePinChange(type, index, e.target.value)}
-            onKeyDown={(e) => handleKeyDown(type, index, e)}
-            className={cn(
-              'w-14 h-14 text-center text-2xl font-bold rounded-xl',
-              'border-2 border-slate-200 dark:border-slate-700',
-              'focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20',
-              'bg-white dark:bg-slate-800 text-slate-800 dark:text-white',
-              'outline-none transition-all'
-            )}
-          />
-        ))}
-      </div>
-    </div>
-  );
-  };
 
   return (
     <div>
@@ -163,9 +129,93 @@ export function CreatePin() {
           </div>
 
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 space-y-6">
-            <PinInput type="current" label="Enter PIN" />
+            {/* <PinInput type="current" label="Enter PIN" />
             <PinInput type="new" label="Create PIN" />
-            <PinInput type="confirm" label="Confirm PIN" />
+            <PinInput type="confirm" label="Confirm PIN" /> */}
+            <div className="space-y-3">
+      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        Enter PIn
+      </label>
+      <div className="flex gap-3 justify-center">
+        {[0, 1, 2, 3].map((index) => (
+          <input
+            key={index}
+            ref={currentPin}
+            type="password"
+            id={`current${index}`}
+            inputMode="numeric"
+            maxLength={1}
+            value={pins['current'][index]}
+            onChange={(e) => handlePinChange('current', index, e.target.value)}
+            onKeyDown={(e) => handleKeyDown('current', index, e)}
+            className={cn(
+              'w-14 h-14 text-center text-2xl font-bold rounded-xl',
+              'border-2 border-slate-200 dark:border-slate-700',
+              'focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20',
+              'bg-white dark:bg-slate-800 text-slate-800 dark:text-white',
+              'outline-none transition-all',
+              'current'
+            )}
+          />
+        ))}
+      </div>
+                </div>
+                <div className="space-y-3">
+      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        New Pin
+      </label>
+      <div className="flex gap-3 justify-center">
+        {[0, 1, 2, 3].map((index) => (
+          <input
+            key={index}
+            ref={newPin}
+            type="password"
+              id={`new${index}`}
+            inputMode="numeric"
+            maxLength={1}
+            value={pins.new[index]}
+            onChange={(e) => handlePinChange('new', index, e.target.value)}
+            onKeyDown={(e) => handleKeyDown('new', index, e)}
+            className={cn(
+              'w-14 h-14 text-center text-2xl font-bold rounded-xl',
+              'border-2 border-slate-200 dark:border-slate-700',
+              'focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20',
+              'bg-white dark:bg-slate-800 text-slate-800 dark:text-white',
+              'outline-none transition-all'
+            )}
+          />
+        ))}
+      </div>
+                </div>
+                
+                <div className="space-y-3">
+      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        Confirm Pin
+      </label>
+      <div className="flex gap-3 justify-center">
+        {[0, 1, 2, 3].map((index) => (
+          <input
+            key={index}
+            ref={confirmPin}
+            type="password"
+              id={`confirm${index}`}
+            inputMode="numeric"
+            maxLength={1}
+            value={pins.confirm[index]}
+            onChange={(e) => handlePinChange('confirm', index, e.target.value)}
+            onKeyDown={(e) => handleKeyDown('confirm', index, e)}
+            className={cn(
+              'w-14 h-14 text-center text-2xl font-bold rounded-xl',
+              'border-2 border-slate-200 dark:border-slate-700',
+              'focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20',
+              'bg-white dark:bg-slate-800 text-slate-800 dark:text-white',
+              'outline-none transition-all'
+            )}
+          />
+        ))}
+      </div>
+    </div>
+                
 
             <Button 
               onClick={handleCreatePin}
@@ -205,8 +255,62 @@ export function CreatePin() {
 
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 space-y-6">
 
-            <PinInput type="new" label="Create PIN" />
-            <PinInput type="confirm" label="Confirm PIN" />
+                  
+                      <div className="space-y-3">
+      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        New Pin
+      </label>
+      <div className="flex gap-3 justify-center">
+        {[0, 1, 2, 3].map((index) => (
+          <input
+            key={index}
+            ref={newPin}
+            type="password"
+              id={`new${index}`}
+            inputMode="numeric"
+            maxLength={1}
+            value={pins.new[index]}
+            onChange={(e) => handlePinChange('new', index, e.target.value)}
+            onKeyDown={(e) => handleKeyDown('new', index, e)}
+            className={cn(
+              'w-14 h-14 text-center text-2xl font-bold rounded-xl',
+              'border-2 border-slate-200 dark:border-slate-700',
+              'focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20',
+              'bg-white dark:bg-slate-800 text-slate-800 dark:text-white',
+              'outline-none transition-all'
+            )}
+          />
+        ))}
+      </div>
+                </div>
+                
+                <div className="space-y-3">
+      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        Confirm Pin
+      </label>
+      <div className="flex gap-3 justify-center">
+        {[0, 1, 2, 3].map((index) => (
+          <input
+            key={index}
+            ref={confirmPin}
+            type="password"
+            inputMode="numeric"
+              id={`confirm${index}`}
+            maxLength={1}
+            value={pins.confirm[index]}
+            onChange={(e) => handlePinChange('confirm', index, e.target.value)}
+            onKeyDown={(e) => handleKeyDown('confirm', index, e)}
+            className={cn(
+              'w-14 h-14 text-center text-2xl font-bold rounded-xl',
+              'border-2 border-slate-200 dark:border-slate-700',
+              'focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20',
+              'bg-white dark:bg-slate-800 text-slate-800 dark:text-white',
+              'outline-none transition-all'
+            )}
+          />
+        ))}
+      </div>
+    </div>
 
             <Button 
               onClick={handleCreatePin}
