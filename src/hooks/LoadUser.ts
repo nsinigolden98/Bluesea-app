@@ -2,6 +2,12 @@ import {ENDPOINTS,API_BASE,getRequest, type User, type AuthState } from '@/types
 import { useState, useEffect} from 'react';
 import { TransactionsData } from '@/data';
 
+const getImageUrl = (path: string | undefined | null) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `${API_BASE}${path}`;
+};
+
 export function useLoadUser() {
   const [newState,setState] = useState<AuthState>({
     isAuthenticated: false,
@@ -23,8 +29,9 @@ export function useLoadUser() {
           firstName: get_user.other_names,
           surname: get_user.surname,
           phone: get_user.phone,
-          profilePicture: `${API_BASE}/${get_user.image}`,
+          profilePicture: getImageUrl(get_user.image),
           balance: get_balance.balance,
+          pin_is_set: get_user.pin_is_set,
           transactions: transaction,
         };
        

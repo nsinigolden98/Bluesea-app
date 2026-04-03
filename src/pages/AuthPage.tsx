@@ -53,8 +53,12 @@ export function AuthPage() {
     showLoader()
     
     if (mode === 'login') {
-      const response: string = await login({ email, password, rememberMe });
-      showToast(response);
+      const response = await login({ email, password, rememberMe });
+      if (response && typeof response === 'object' && 'email' in response) {
+        navigate('/dashboard');
+      } else if (response) {
+        showToast(response);
+      }
     
     } else {
       if (password !== confirmPassword) {

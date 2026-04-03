@@ -66,6 +66,9 @@ export function Services() {
       case '6': // Light Bills
         navigate('/light-bills');
         break;
+      case '7': // TV Subscription
+        navigate('/tv-subscription');
+        break;
       case '8': // Wallet
         navigate('/wallet');
         break;

@@ -1,16 +1,17 @@
 import { cn } from '@/lib/utils';
-import { Menu, Bell } from 'lucide-react';
+import { Menu, Bell, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { notifications } from '@/data';
 
 interface HeaderProps {
   title: string;
   subtitle?: string;
-  onMenuClick: () => void;
+  onMenuClick?: () => void;
   className?: string;
+  showBackButton?: boolean;
 }
 
-export function Header({ title, subtitle, onMenuClick, className }: HeaderProps) {
+export function Header({ title, subtitle, onMenuClick, className, showBackButton }: HeaderProps) {
   const navigate = useNavigate();
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -22,12 +23,23 @@ export function Header({ title, subtitle, onMenuClick, className }: HeaderProps)
       )}
     >
       <div className="flex items-center gap-3">
-        <button 
-          onClick={onMenuClick}
-          className="lg:hidden p-2 -ml-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+        {showBackButton ? (
+          <button 
+            onClick={() => navigate(-1)}
+            className="lg:hidden p-2 -ml-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        ) : (
+          onMenuClick && (
+            <button 
+              onClick={onMenuClick}
+              className="lg:hidden p-2 -ml-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          )
+        )}
         <div>
           <h1 className="text-xl font-bold text-slate-800 dark:text-white">{title}</h1>
           {subtitle && (

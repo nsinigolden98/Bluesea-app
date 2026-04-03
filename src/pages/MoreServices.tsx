@@ -22,6 +22,10 @@ import {
   Headphones,
   ChevronRight,
   ArrowLeft,
+  BookOpen,
+  FileText,
+  GraduationCap,
+  Bell,
 } from 'lucide-react';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -41,6 +45,10 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Share2,
   Award,
   Headphones,
+  BookOpen,
+  FileText,
+  GraduationCap,
+  Bell,
 };
 
 export function MoreServices() {
@@ -57,15 +65,30 @@ export function MoreServices() {
 
     // Map service IDs to routes
     const routeMap: Record<string, string> = {
+      // Telecom
       't1': '/airtime',
       't2': '/data',
       't3': '/airtime-buyback',
+      't4': '/auto-topup',
+      // TV Subscription
+      'tv1': '/tv-subscription',
+      'tv2': '/tv-subscription',
+      'tv3': '/tv-subscription',
+      'tv4': '/tv-subscription',
+      // Education
+      'e1': '/waec-registration',
+      'e2': '/waec-result',
+      'e3': '/jamb-registration',
+      // Utilities
       'u1': '/light-bills',
+      // Finance
       'f1': '/wallet',
       'f2': '/group-payment',
+      // Others
       'o1': '/rewards',
       'o2': '/rewards',
       'o3': '/loyalty',
+      'o5': '/notifications',
     };
 
     const route = routeMap[serviceId];

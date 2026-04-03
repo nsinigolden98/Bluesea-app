@@ -43,20 +43,41 @@ export function PinModal() {
         response = await postRequest(ENDPOINTS.buy_airtime, value)  
      }   else if (type === 'light') {
          response = await postRequest(ENDPOINTS.electricity, value);
-          
-      } else if (type === 'data-MTN') {
-      response = await postRequest(ENDPOINTS.buy_mtn, value);
-        
-      } else if (type === 'data-Glo') {
-      response = await postRequest(ENDPOINTS.buy_glo, value);
-       
-      } else if (type === 'data-Airtel') {
-        response = await postRequest(ENDPOINTS.buy_airtel, value);
-        
-      } else if (type === 'data-9mobile') {
-        response = await postRequest(ENDPOINTS.buy_etisalat, value);   
-      }
-    return response
+           
+       } else if (type === 'data-MTN') {
+       response = await postRequest(ENDPOINTS.buy_mtn, value);
+         
+       } else if (type === 'data-Glo') {
+       response = await postRequest(ENDPOINTS.buy_glo, value);
+      
+       } else if (type === 'data-Airtel') {
+         response = await postRequest(ENDPOINTS.buy_airtel, value);
+         
+       } else if (type === 'data-9mobile') {
+         response = await postRequest(ENDPOINTS.buy_etisalat, value);   
+       } else if (type === 'marketplace') {
+         const payload = value as { event_id: string; ticket_type: string; quantity: number; transaction_pin: string };
+         response = await postRequest(ENDPOINTS.marketplace_purchase(payload.event_id), {
+           ticket_type: payload.ticket_type,
+           quantity: payload.quantity,
+           transaction_pin: payload.transaction_pin,
+         });
+       } else if (type === 'dstv') {
+         response = await postRequest(ENDPOINTS.dstv, value);
+       } else if (type === 'gotv') {
+         response = await postRequest(ENDPOINTS.gotv, value);
+       } else if (type === 'startimes') {
+         response = await postRequest(ENDPOINTS.startimes, value);
+       } else if (type === 'showmax') {
+         response = await postRequest(ENDPOINTS.showmax, value);
+       } else if (type === 'waec-registration') {
+         response = await postRequest(ENDPOINTS.waec_registration, value);
+       } else if (type === 'waec-result') {
+         response = await postRequest(ENDPOINTS.waec_result, value);
+       } else if (type === 'jamb') {
+         response = await postRequest(ENDPOINTS.jamb_registration, value);
+       }
+   return response
 
   };
  

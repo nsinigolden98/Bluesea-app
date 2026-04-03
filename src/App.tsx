@@ -8,34 +8,52 @@ import {
   Wallet,
   Airtime,
   Data,
-  Marketplace,
   Services,
   Settings,
   Profile,
   CreatePin,
   LightBills,
   Transactions,
-  Rewards,
   AirtimeBuyback,
   GroupPayment,
   Loyalty,
   MoreServices,
-  Admin,
   Notifications,
+  EventManager,
+  Scanner,
+  MyTickets,
+  VendorVerification,
+  DSTV,
+  GOTV,
+  Startimes,
+  ShowMax,
+  WAECRegistration,
+  WAECResult,
+  JAMBRegistration,
+  TVSubscription,
+  AutoTopUp,
 } from '@/pages';
 import './App.css';
 import { useAuth } from '@/context/AuthContext';
 
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated} = useAuth()
+  const { isAuthenticated, loading } = useAuth()
+  
+  if (loading) {
+    return null;
+  }
   
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 }
 
 // Public Route Component (redirects to dashboard if authenticated)
 function PublicRoute({ children}: { children: React.ReactNode}) {
-  const {isAuthenticated} = useAuth() 
+  const { isAuthenticated, loading } = useAuth()
+
+  if (loading) {
+    return null;
+  }
 
   return !isAuthenticated ? <>{children}</> : <Navigate to="/dashboard" />;
 }
@@ -95,14 +113,15 @@ function AppRoutes() {
           </ProtectedRoute>
         } 
       />
-      <Route 
+      {/* Temporarily disabled - coming soon */}
+      {/* <Route 
         path="/marketplace" 
         element={
           <ProtectedRoute   >
             <Marketplace />
           </ProtectedRoute>
         } 
-      />
+      /> */}
       <Route 
         path="/services" 
         element={
@@ -151,14 +170,15 @@ function AppRoutes() {
           </ProtectedRoute>
         } 
       />
-      <Route 
+      {/* Temporarily disabled - coming soon */}
+      {/* <Route 
         path="/rewards" 
         element={
           <ProtectedRoute  >
             <Rewards />
           </ProtectedRoute>
         } 
-      />
+      /> */}
       <Route 
         path="/airtime-buyback" 
         element={
@@ -192,18 +212,114 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/admin" 
-        element={
-          <ProtectedRoute  >
-            <Admin />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
         path="/notifications" 
         element={
           <ProtectedRoute  >
             <Notifications />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/event-manager" 
+        element={
+          <ProtectedRoute  >
+            <EventManager />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/scanner" 
+        element={
+          <ProtectedRoute  >
+            <Scanner />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/my-tickets" 
+        element={
+          <ProtectedRoute  >
+            <MyTickets />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/vendor-verification" 
+        element={
+          <ProtectedRoute  >
+            <VendorVerification />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/dstv" 
+        element={
+          <ProtectedRoute  >
+            <DSTV />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/gotv" 
+        element={
+          <ProtectedRoute  >
+            <GOTV />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/startimes" 
+        element={
+          <ProtectedRoute  >
+            <Startimes />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/showmax" 
+        element={
+          <ProtectedRoute  >
+            <ShowMax />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/waec-registration" 
+        element={
+          <ProtectedRoute  >
+            <WAECRegistration />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/waec-result" 
+        element={
+          <ProtectedRoute  >
+            <WAECResult />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/jamb-registration" 
+        element={
+          <ProtectedRoute  >
+            <JAMBRegistration />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/tv-subscription" 
+        element={
+          <ProtectedRoute  >
+            <TVSubscription />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/auto-topup" 
+        element={
+          <ProtectedRoute  >
+            <AutoTopUp />
           </ProtectedRoute>
         } 
       />

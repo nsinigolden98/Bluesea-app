@@ -37,16 +37,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({
     isAuthenticated: false,
     user: null,
-    loading: false,
+    loading: true,
   });
-  
-useEffect( () => {
-  const loadUser = async () => {
-    setState(prev => ({ ...prev, loading: true }));
-  
+
+  const getImageUrl = (path: string | undefined | null) => {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return `${API_BASE}${path}`;
+  };
+
+  useEffect( () => {
+    const loadUser = async () => {
     try {
       if (TOKEN !== '') {
-        
         const get_user = await getRequest(ENDPOINTS.user);
         const get_balance = await getRequest(ENDPOINTS.balance);
       
@@ -55,7 +58,7 @@ useEffect( () => {
           firstName: get_user.other_names,
           surname: get_user.surname,
           phone: get_user.phone,
-          profilePicture: `${API_BASE}/${get_user.image}`,
+          profilePicture: getImageUrl(get_user.image),
           balance: get_balance.balance,
           pin_is_set: get_user.pin_is_set,
         };
@@ -74,7 +77,15 @@ useEffect( () => {
         });
       }
     } catch (error) {
-      setState(prev => ({ ...prev, loading: true }));
+      if (TOKEN !== '') {
+        setState(prev => ({ ...prev, loading: false }));
+      } else {
+        setState({
+          isAuthenticated: false,
+          user: null,
+          loading: false,
+        });
+      }
       console.log(error)
     }
   }
@@ -89,43 +100,44 @@ useEffect( () => {
     deleteCookie('refresh_token')
     const response = await postRequest(ENDPOINTS.login, _data)
     if (response.detail === undefined) {
-      // if (_data.rememberMe) {
-      //   setCookie('email', _data.email)
-      //   setCookie('password', _data.password)
-      // }
       if (response.user.email_verified) {
-         setCookie('access_token',response.access_token);
-         setCookie('refresh_token', response.refresh_token); 
+        setCookie('access_token',response.access_token);
+        setCookie('refresh_token', response.refresh_token); 
         
         const get_user = await getRequest(ENDPOINTS.user);
         const get_balance = await getRequest(ENDPOINTS.balance);
-              const user: User = {
-                id:response.user.id,
-                email: get_user.email,
-                firstName:get_user.other_names,
-                surname: get_user.surname,
-                phone: get_user.phone,
-                profilePicture: `${API_BASE}/${get_user.image}`,
-                balance: get_balance.balance,
-                pin_is_set: get_user.pin_is_set
-        } 
+        const user: User = {
+          id: response.user.id,
+          email: get_user.email,
+          firstName: get_user.other_names,
+          surname: get_user.surname,
+          phone: get_user.phone,
+          profilePicture: getImageUrl(get_user.image),
+          balance: get_balance.balance,
+          pin_is_set: get_user.pin_is_set
+        }; 
         setState({
           isAuthenticated: true,
-                user: user,
-          loading: true,
+          user: user,
+          loading: false,
         });
-        window.location.reload();
-      
-          } 
-    } else {
-    setState({
+        return user; // Return user on success
+      } else {
+        setState({
           isAuthenticated: false,
           user: null,
           loading: false,
-    });
-      return response.detail
+        });
+        return "Please verify your email";
+      }
+    } else {
+      setState({
+        isAuthenticated: false,
+        user: null,
+        loading: false,
+      });
+      return response.detail;
     }
-      
   }, []);
 
   const signup = useCallback(async (data: SignupFormData) => {
@@ -170,37 +182,34 @@ useEffect( () => {
     onSuccess: async (tokenResponse: TokenResponse) => {
       setState(prev => ({ ...prev, loading: true }));
       const redirect_uri = `${import.meta.env.VITE_BASE_URL}/dashboard/`;
-      const response = await postRequest(ENDPOINTS.oauthGoogle,{
+      const response = await postRequest(ENDPOINTS.oauthGoogle, {
         id_token: tokenResponse.access_token,
         redirect_uri
       });
-       if (response.success) {
-    
-      const get_user = await getRequest(ENDPOINTS.user)
-         const get_balance = await getRequest(ENDPOINTS.balance);
+      if (response.success) {
+        const get_user = await getRequest(ENDPOINTS.user);
+        const get_balance = await getRequest(ENDPOINTS.balance);
 
-    const user: User = {
-                id:get_user.id,
-                email: get_user.email,
-                firstName:get_user.other_names,
-                surname: get_user.surname,
-                phone: get_user.phone,
-                profilePicture: `${API_BASE}/${get_user.image}`,
-                balance: get_balance.balance,
-                pin_is_set: get_user.pin_is_set,
-        } 
-      setState({
-      isAuthenticated: true,
-      user: user,
-      loading: true,
-      });
-         setCookie('refresh_token',response.refresh_token);
-      setCookie('access_token',response.access_token);
-    }
-      
-  } 
-    
-  })
+        const user: User = {
+          id: get_user.id,
+          email: get_user.email,
+          firstName: get_user.other_names,
+          surname: get_user.surname,
+          phone: get_user.phone,
+          profilePicture: getImageUrl(get_user.image),
+          balance: get_balance.balance,
+          pin_is_set: get_user.pin_is_set,
+        }; 
+        setState({
+          isAuthenticated: true,
+          user: user,
+          loading: false,
+        });
+        setCookie('refresh_token', response.refresh_token);
+        setCookie('access_token', response.access_token);
+      }
+    } 
+  });
 
   return (
     <AuthContext.Provider

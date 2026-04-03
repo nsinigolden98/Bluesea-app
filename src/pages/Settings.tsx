@@ -10,7 +10,6 @@ import {
   ArrowLeft,
   Moon,
   Sun,
-  Shield,
   Bell,
   Grid3X3
 } from 'lucide-react';
@@ -60,13 +59,6 @@ export function Settings() {
       label: 'More Services', 
       icon: Grid3X3, 
       action: () => navigate('/more-services'),
-      showArrow: true 
-    },
-    { 
-      id: 'admin', 
-      label: 'Admin Access', 
-      icon: Shield, 
-      action: () => navigate('/admin'),
       showArrow: true 
     },
   ];

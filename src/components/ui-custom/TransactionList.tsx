@@ -17,11 +17,6 @@ export function TransactionList({
 }: TransactionListProps) {
 
   const [transactionArray, setTransactionArray] = useState<Transaction[]>([]);
-  const [count, setCount] = useState(0);
-
-  const number_page = async () => {
-    
-  }
 
   useEffect(() => {
     const transaction = async () => {

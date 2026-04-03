@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ENDPOINTS, postRequest } from '@/types';
+import { Users, Plus, X, RefreshCw } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const meterTypes = ['Prepaid', 'Postpaid'];
 interface BillerName {
@@ -56,14 +58,25 @@ export function LightBills() {
   const [txStatus, setTxStatus] = useState<boolean | null>(null);
   const [toastMessage, setToastMessage] = useState('')
 
+  // Group payment state
+  const [isGroupPayment, setIsGroupPayment] = useState(false);
+  const [inviteMembers, setInviteMembers] = useState<string[]>(['']);
+  const [groupName, setGroupName] = useState('');
+
 
   const pricePerUnit = 70;
   const units = amount ? Math.floor(Number(amount) / pricePerUnit) : 0;
   const payload = {
     billerCode: meterNumber,
     amount: Number(amount),
-    biller_name: BILLER_NAME[biller],
+    biller_name: BILLER_NAME[biller as keyof BillerName],
     meter_type: meterType.toLowerCase(),
+    is_group_payment: isGroupPayment,
+    ...(isGroupPayment && {
+      group_name: groupName,
+      invite_members: inviteMembers.filter(e => e.trim()).join(','),
+      service_type: 'lightbill',
+    }),
   }
   const handleContinue = async() => {
     if (!meterNumber || !meterType || !biller || !amount) {
@@ -81,7 +94,7 @@ export function LightBills() {
     const data =  {
           meter_number: Number(meterNumber),
           meter_type: meterType.toLowerCase(),
-            biller: BILLER_NAME[biller]
+            biller: BILLER_NAME[biller as keyof BillerName]
       }
       const response = await postRequest(ENDPOINTS.electricity_user, data)
       hideLoader()
@@ -248,6 +261,88 @@ export function LightBills() {
                     >
                       Continue Payment
                     </Button>
+
+                    {/* Auto Top-Up Button */}
+                    <Button 
+                      variant="outline"
+                      onClick={() => navigate('/auto-topup')}
+                      className="w-full rounded-full py-6 mt-3 border-sky-500 text-sky-500 hover:bg-sky-50"
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Set Up Auto Top-Up
+                    </Button>
+
+                    {/* Group Payment Toggle */}
+                    <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <Users className="w-5 h-5 text-sky-500" />
+                        <div>
+                          <p className="font-medium text-slate-800 dark:text-white">Group Payment</p>
+                          <p className="text-xs text-slate-500">Split with friends & family</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setIsGroupPayment(!isGroupPayment)}
+                        className={cn(
+                          "w-12 h-6 rounded-full transition-colors",
+                          isGroupPayment ? "bg-sky-500" : "bg-slate-300 dark:bg-slate-600"
+                        )}
+                      >
+                        <div className={cn(
+                          "w-5 h-5 bg-white rounded-full transition-transform",
+                          isGroupPayment ? "translate-x-6" : "translate-x-0.5"
+                        )} />
+                      </button>
+                    </div>
+
+                    {/* Group Payment Details */}
+                    {isGroupPayment && (
+                      <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                        <div className="space-y-2">
+                          <Label htmlFor="groupName">Group Name</Label>
+                          <Input
+                            id="groupName"
+                            placeholder="e.g., Family Light Bill"
+                            value={groupName}
+                            onChange={(e) => setGroupName(e.target.value)}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label>Invite Members (Email addresses)</Label>
+                          {inviteMembers.map((email, index) => (
+                            <div key={index} className="flex gap-2">
+                              <Input
+                                placeholder="Enter email address"
+                                value={email}
+                                onChange={(e) => {
+                                  const newMembers = [...inviteMembers];
+                                  newMembers[index] = e.target.value;
+                                  setInviteMembers(newMembers);
+                                }}
+                              />
+                              {inviteMembers.length > 1 && (
+                                <button
+                                  onClick={() => {
+                                    const newMembers = inviteMembers.filter((_, i) => i !== index);
+                                    setInviteMembers(newMembers);
+                                  }}
+                                  className="p-2 text-red-500"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          <button
+                            onClick={() => setInviteMembers([...inviteMembers, ''])}
+                            className="text-sm text-sky-500 flex items-center gap-1"
+                          >
+                            <Plus className="w-4 h-4" /> Add another
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

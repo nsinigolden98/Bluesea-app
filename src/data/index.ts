@@ -1,4 +1,4 @@
-import type { DataPlan, Service, NavItem, Transaction, BluePointHistory, Task, Streak, Announcement, Notification, LoyaltyItem, GroupPayment } from '@/types';
+import type { DataPlan, Service, NavItem, Transaction, BluePointHistory, Task, Streak, Announcement, Notification, LoyaltyItem, GroupPayment, Network } from '@/types';
 import { ENDPOINTS, getRequest} from '@/types';
 
 export const navItems: NavItem[] = [
@@ -21,12 +21,12 @@ export const services: Service[] = [
   { id: '4', name: 'Airtime', icon: 'Smartphone', category: 'Airtime & Data' },
   { id: '5', name: 'Data', icon: 'Wifi', category: 'Airtime & Data' },
   { id: '6', name: 'Light Bills', icon: 'Zap', category: 'Bills & Utilities' },
-  { id: '7', name: 'TV subs', icon: 'Tv', category: 'Bills & Utilities', comingSoon: true },
+  { id: '7', name: 'TV Subscription', icon: 'Tv', category: 'Bills & Utilities' },
   { id: '8', name: 'Wallet', icon: 'Wallet', category: 'Wallet' },
   { id: '9', name: 'Gift Card', icon: 'Gift', category: 'Wallet', comingSoon: true },
   { id: '10', name: 'Referral/Reward', icon: 'Share2', category: 'Value Added' },
   { id: '11', name: 'Blue Point', icon: 'Coins', category: 'Value Added' },
-  { id: '12', name: 'Airtime Buyback', icon: 'RefreshCw', category: 'Special Features' },
+  { id: '12', name: 'Airtime Buyback', icon: 'RefreshCw', category: 'Special Features', comingSoon: true },
 ];
   
 export const TransactionsData= async ():Promise<Transaction[]> => {
@@ -158,15 +158,47 @@ export const groupPayments: GroupPayment[] = [
 ];
 
 // More Services Categories
-export const moreServiceCategories = [
+export interface ServiceItem {
+  id: string;
+  name: string;
+  icon: string;
+  comingSoon?: boolean;
+}
+
+export interface ServiceCategory {
+  id: string;
+  name: string;
+  services: ServiceItem[];
+}
+
+export const moreServiceCategories: ServiceCategory[] = [
   {
     id: 'telecom',
     name: 'Telecom',
     services: [
-      { id: 't1', name: 'Airtime Purchase', icon: 'Smartphone' },
+      { id: 't1', name: 'Airtime', icon: 'Smartphone' },
       { id: 't2', name: 'Data Bundle', icon: 'Wifi' },
       { id: 't3', name: 'Airtime Buyback', icon: 'RefreshCw' },
-      { id: 't4', name: 'SMS Bundle', icon: 'MessageSquare', comingSoon: true },
+      { id: 't4', name: 'Auto Top-Up', icon: 'RefreshCw' },
+    ],
+  },
+  {
+    id: 'tv',
+    name: 'TV Subscription',
+    services: [
+      { id: 'tv1', name: 'DSTV', icon: 'Tv' },
+      { id: 'tv2', name: 'GOTV', icon: 'Tv' },
+      { id: 'tv3', name: 'Startimes', icon: 'Tv' },
+      { id: 'tv4', name: 'ShowMax', icon: 'Tv' },
+    ],
+  },
+  {
+    id: 'education',
+    name: 'Education',
+    services: [
+      { id: 'e1', name: 'WAEC Registration', icon: 'BookOpen' },
+      { id: 'e2', name: 'WAEC Result', icon: 'FileText' },
+      { id: 'e3', name: 'JAMB Registration', icon: 'GraduationCap' },
     ],
   },
   {
@@ -174,9 +206,6 @@ export const moreServiceCategories = [
     name: 'Utilities',
     services: [
       { id: 'u1', name: 'Electricity Bill', icon: 'Zap' },
-      { id: 'u2', name: 'Water Bill', icon: 'Droplets', comingSoon: true },
-      { id: 'u3', name: 'TV Subscription', icon: 'Tv' },
-      { id: 'u4', name: 'Internet Bill', icon: 'Globe', comingSoon: true },
     ],
   },
   {
@@ -185,8 +214,6 @@ export const moreServiceCategories = [
     services: [
       { id: 'f1', name: 'Wallet', icon: 'Wallet' },
       { id: 'f2', name: 'Group Payment', icon: 'Users' },
-      { id: 'f3', name: 'Gift Card', icon: 'Gift', comingSoon: true },
-      { id: 'f4', name: 'Savings', icon: 'PiggyBank', comingSoon: true },
     ],
   },
   {
@@ -197,6 +224,7 @@ export const moreServiceCategories = [
       { id: 'o2', name: 'Referral Program', icon: 'Share2' },
       { id: 'o3', name: 'Loyalty Rewards', icon: 'Award' },
       { id: 'o4', name: 'Support', icon: 'Headphones' },
+      { id: 'o5', name: 'Notifications', icon: 'Bell' },
     ],
   },
 ];
@@ -462,21 +490,20 @@ const  etisalat_dict = {
      * @returns {Object} Structured plans keyed by plan name
      */
 
-    function processPlans(network: string,rawDict: object) {
-        const processed = {};
+    function processPlans(network: string, rawDict: any): DataPlan[] {
+        const processed: DataPlan[] = [];
         for (const name in rawDict) {
-            // Note: rawDict[name] is an array: [id, price]
             const [id, price] = rawDict[name];
             const details = parsePlanDetails(name);
-            processed[name] = {
+            processed.push({
                 id: id,
                 price: price,
                 size: details.volume,
                 validity: details.validity,
-                planType: details.type,
-              network: network,
-              description: name
-            };
+                planType: details.type as 'Daily' | 'Weekly' | 'Monthly' | 'Extravalue',
+                network: network as Network,
+                description: name
+            });
         }
         return processed;
     }

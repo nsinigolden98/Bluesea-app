@@ -11,7 +11,8 @@ export interface User {
   profilePicture?: string;
   balance: string;
   pin_is_set: boolean;
-  // bluePoints: number;
+  bluePoints?: number;
+  transactions?: Transaction[];
 }
 
 // Transaction Types
@@ -146,6 +147,118 @@ export interface LoyaltyItem {
   available: boolean;
 }
 
+// Marketplace Types
+export interface TicketType {
+  id: string;
+  name: string;
+  price: string;
+  quantity_available: number;
+  description?: string;
+}
+
+export interface Vendor {
+  id: string;
+  business_name: string;
+  logo?: string;
+  is_verified: boolean;
+}
+
+export interface MarketplaceEvent {
+  id: string;
+  vendor: Vendor;
+  event_title: string;
+  event_description: string;
+  event_date: string;
+  event_location: string;
+  hosted_by: string;
+  category: string;
+  is_free: boolean;
+  quantity?: number;
+  event_banner?: string;
+  ticket_image?: string;
+  is_approved: boolean;
+  ticket_types: TicketType[];
+  total_tickets: number;
+  tickets_sold: number;
+  created_at: string;
+}
+
+export interface MyTicket {
+  id: string;
+  event_title: string;
+  event_date: string;
+  event_location: string;
+  event_banner?: string;
+  is_free: boolean;
+  ticket_type: TicketType;
+  owner_name: string;
+  owner_email: string;
+  status: string;
+  vendor_name: string;
+  qr_code: string;
+  created_at: string;
+  transferred_at?: string;
+  canceled_at?: string;
+}
+
+export interface ScannerStats {
+  total_tickets: number;
+  scanned_tickets: number;
+  remaining: number;
+}
+
+export interface ScannerAssignment {
+  event_id: string;
+  event_title: string;
+  event_date: string;
+  event_location: string;
+  event_banner?: string;
+  vendor: string;
+  role: 'scanner' | 'vendor';
+  statistics: ScannerStats;
+  assigned_at?: string;
+}
+
+export interface VendorStatus {
+  id: string;
+  brand_name: string;
+  business_type: string;
+  is_verified: boolean;
+  verification_status: 'pending' | 'approved' | 'rejected';
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateEventPayload {
+  event_title: string;
+  event_description: string;
+  event_date: string;
+  event_location: string;
+  hosted_by: string;
+  category: string;
+  is_free: boolean;
+  quantity?: number;
+  event_banner?: File;
+  ticket_image?: File;
+  ticket_types?: {
+    name: string;
+    price: string;
+    quantity_available: number;
+    description?: string;
+  }[];
+}
+
+export interface CreateVendorPayload {
+  brand_name: string;
+  business_type: string;
+  residential_address: string;
+  state_city: string;
+  id_type: string;
+  monthly_volume: string;
+  business_description: string;
+  legal_name?: string;
+}
+
 // Group Payment Types
 export interface Contributor {
   id: string;
@@ -210,12 +323,28 @@ export const ENDPOINTS = {
   account_name: `${API_BASE}/transactions/account-name/`,
   electricity: `${API_BASE}/payments/electricity/`,
   electricity_user: `${API_BASE}/payments/electricity/customer/`,
+  notifications: `${API_BASE}/notifications/`,
   group_payment_history: `${API_BASE}/payments/group-payment/history/`,
   group_payment: `${API_BASE}/payments/group-payment/`,
+  group_payment_create: `${API_BASE}/group-payment/create/`,
+  group_payment_my_groups: `${API_BASE}/group-payment/my-groups/`,
+  group_payment_details: `${API_BASE}/group-payment/`,
+  group_payment_leave: `${API_BASE}/group-payment/leave/`,
+  group_payment_cancel: `${API_BASE}/group-payment/cancel/`,
+  group_payment_join: `${API_BASE}/group-payment/join-group/`,
   dstv: `${API_BASE}/payments/dstv/`,
   showmax: `${API_BASE}/payments/showmax/`,
   startimes: `${API_BASE}/payments/startimes/`,
   gotv: `${API_BASE}/payments/gotv/`,
+  waec_registration: `${API_BASE}/payments/waec-registration/`,
+  waec_result: `${API_BASE}/payments/waec-result/`,
+  jamb_registration: `${API_BASE}/payments/jamb-registration/`,
+  auto_topup_list: `${API_BASE}/autotopup/`,
+  auto_topup_create: `${API_BASE}/autotopup/create/`,
+  auto_topup_details: (id: string) => `${API_BASE}/autotopup/${id}/`,
+  auto_topup_cancel: (id: string) => `${API_BASE}/autotopup/${id}/cancel/`,
+  auto_topup_reactivate: (id: string) => `${API_BASE}/autotopup/${id}/reactivate/`,
+  auto_topup_history: (id: string) => `${API_BASE}/autotopup/${id}/history/`,
   create_group: `${API_BASE}/payments/group/create/`,
   join_group: `${API_BASE}/payments/group/join-group/`,
   add_to_group: `${API_BASE}/payments/group/add-member/`,
@@ -230,7 +359,17 @@ export const ENDPOINTS = {
   tickets: `${API_BASE}/marketplace/tickets/`,
   mytickets: `${API_BASE}/marketplace/tickets/my/`,
   purchase: `${API_BASE}/marketplace/events/`,
-  scan_ticket: `${API_BASE}/marketplace/tickets/scan/`
+  scan_ticket: `${API_BASE}/marketplace/tickets/scan/`,
+  marketplace_events: `${API_BASE}/marketplace/events/all/`,
+  marketplace_event_detail: (id: string) => `${API_BASE}/marketplace/events/${id}/`,
+  marketplace_purchase: (id: string) => `${API_BASE}/marketplace/events/${id}/purchase/`,
+  marketplace_my_tickets: `${API_BASE}/marketplace/tickets/my/`,
+  marketplace_my_events: `${API_BASE}/marketplace/events/my/`,
+  marketplace_scanner_stats: (id: string) => `${API_BASE}/marketplace/events/${id}/scan-stats/`,
+  marketplace_my_scanner_assignments: `${API_BASE}/marketplace/my-scanner-assignments/`,
+  marketplace_ticket_detail: (id: string) => `${API_BASE}/marketplace/tickets/${id}/`,
+  marketplace_ticket_transfer: (id: string) => `${API_BASE}/marketplace/tickets/${id}/transfer/`,
+  marketplace_ticket_cancel: (id: string) => `${API_BASE}/marketplace/tickets/${id}/cancel/`,
 };
 
 // Save Access Token In Cookie
@@ -271,8 +410,9 @@ export async function getRequest(url: string) {
         }
       });
     return response.data
-  } catch (error) {
+  } catch (error: any) {
     console.log(error)
+    return {}
   }
 }
 
@@ -289,8 +429,8 @@ export async function postRequest(url: string, payload: object) {
 
       });
     return response.data
-  } catch (error) {
-      return error?.response?.data
+  } catch (error: any) {
+    return error?.response?.data || {}
   }
 }
 // POST REQUEST (FILES)
@@ -325,4 +465,23 @@ export async function putRequest(url: string, payload: object) {
     console.log(error)
   }
 }
+
+// DELETE REQUEST
+export async function deleteRequest(url: string) {
+  try {
+    const response = await axios.delete(url,
+      {
+        headers: {
+          "Authorization": `Bearer ${TOKEN}`,
+          "Content-Type": "application/json",
+          "Accept": 'application/json'
+        }
+
+      });
+    return response.data
+  } catch (error: any) {
+    return error?.response?.data || {}
+  }
+}
+
 
