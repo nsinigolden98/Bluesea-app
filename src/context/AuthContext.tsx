@@ -12,7 +12,6 @@ import {
   API_BASE
 } from '@/types';
 import { useGoogleLogin, type TokenResponse } from '@react-oauth/google'
-import { TransactionsData } from '@/data';
 import { TOKEN } from '@/types'
 
  interface SignUpResponse {
@@ -50,7 +49,6 @@ useEffect( () => {
         
         const get_user = await getRequest(ENDPOINTS.user);
         const get_balance = await getRequest(ENDPOINTS.balance);
-        const transaction = await TransactionsData()
       
         const user: User = {
           email: get_user.email,
@@ -59,7 +57,6 @@ useEffect( () => {
           phone: get_user.phone,
           profilePicture: `${API_BASE}/${get_user.image}`,
           balance: get_balance.balance,
-          transactions: transaction,
           pin_is_set: get_user.pin_is_set,
         };
        
@@ -102,7 +99,6 @@ useEffect( () => {
         
         const get_user = await getRequest(ENDPOINTS.user);
         const get_balance = await getRequest(ENDPOINTS.balance);
-        const transaction = await TransactionsData()
               const user: User = {
                 id:response.user.id,
                 email: get_user.email,
@@ -111,16 +107,15 @@ useEffect( () => {
                 phone: get_user.phone,
                 profilePicture: `${API_BASE}/${get_user.image}`,
                 balance: get_balance.balance,
-                transactions: transaction,
-                pin_is_set: get_user.pin_is_set,
+                pin_is_set: get_user.pin_is_set
         } 
         setState({
           isAuthenticated: true,
                 user: user,
           loading: true,
         });
-        
-        return 'Login Successful. Redirecting ...'
+        window.location.reload();
+      
           } 
     } else {
     setState({
@@ -142,7 +137,6 @@ useEffect( () => {
       firstName: data.firstName,
       surname: data.surname,
       balance: "0",
-      transactions: [],
       pin_is_set: false,
     }
     setState({
@@ -183,8 +177,8 @@ useEffect( () => {
        if (response.success) {
     
       const get_user = await getRequest(ENDPOINTS.user)
-         const get_balance = await getRequest(ENDPOINTS.balance)
-          const transaction = await TransactionsData()
+         const get_balance = await getRequest(ENDPOINTS.balance);
+
     const user: User = {
                 id:get_user.id,
                 email: get_user.email,
@@ -193,7 +187,6 @@ useEffect( () => {
                 phone: get_user.phone,
                 profilePicture: `${API_BASE}/${get_user.image}`,
                 balance: get_balance.balance,
-                transactions: transaction,
                 pin_is_set: get_user.pin_is_set,
         } 
       setState({

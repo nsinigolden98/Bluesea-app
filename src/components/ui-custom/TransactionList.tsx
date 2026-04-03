@@ -1,6 +1,8 @@
 import { cn } from '@/lib/utils';
 import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import {TransactionsData} from '@/data'
+import {useEffect, useState } from 'react';
+import { type Transaction } from '@/types';
 interface TransactionListProps {
   limit?: number;
   showViewAll?: boolean;
@@ -13,8 +15,25 @@ export function TransactionList({
   showViewAll = true,
   className,
 }: TransactionListProps) {
-  const { user } = useAuth()
-  const displayData =  user?.transactions || []
+
+  const [transactionArray, setTransactionArray] = useState<Transaction[]>([]);
+  const [count, setCount] = useState(0);
+
+  const number_page = async () => {
+    
+  }
+
+  useEffect(() => {
+    const transaction = async () => {
+      setTransactionArray([])
+      const array = await TransactionsData();
+      setTransactionArray(array);
+
+    }
+    transaction();
+  }, [showViewAll]);
+
+  const displayData: Array<Transaction> = transactionArray
   const transactions = displayData.slice(0, limit);
   const redirect = () => window.location.href = '/transactions'
   return (

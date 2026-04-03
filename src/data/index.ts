@@ -42,6 +42,7 @@ export const TransactionsData= async ():Promise<Transaction[]> => {
     const pageResults = await Promise.all(
       pages.map(page => getRequest(`${ENDPOINTS.history}?page=${page}`))
     );
+    console.log(pageResults)
 
     // Flatten all results into a single array and filter out any empty/undefined entries
     const allData = pageResults

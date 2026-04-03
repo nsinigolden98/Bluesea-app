@@ -35,7 +35,7 @@ export function AuthPage() {
   const { showToast, ToastComponent } = Toast()
   const { showLoader, hideLoader, LoaderComponent } = Loader()
   const { AuthComponent, setComponentVisibilty } = AuthEmailModal()
-  const {setForgotPasswordVisibility, ForgotPasswordComponent} = ForgotPasswordModal
+  const { setForgotPasswordVisibility, ForgotPasswordComponent } = ForgotPasswordModal();
   
   // Form states
   const [email, setEmail] = useState('');

@@ -11,7 +11,6 @@ export interface User {
   profilePicture?: string;
   balance: string;
   pin_is_set: boolean;
-  transactions: Array<Transaction>;
   // bluePoints: number;
 }
 

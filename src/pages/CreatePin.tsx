@@ -37,10 +37,11 @@ export function CreatePin() {
     setPins(newPins);
 
     if (value.length === 1 && index < 3) {
-      document.getElementById(`${type}${index + 1}`).focus();
-      
-    }
-    
+      const input = document.getElementById(`${type}${index + 1}`) as HTMLInputElement;
+      if (input) {
+        input.focus();
+      };
+    };
   };
 
   const handleKeyDown = (
@@ -52,8 +53,11 @@ export function CreatePin() {
       const newPins = { ...pins };
       newPins[type][index] = '';
       setPins(newPins);
-      document.getElementById(`${type}${index - 1}`).focus();
-    }
+       const input = document.getElementById(`${type}${index - 1}`) as HTMLInputElement
+      if (input) {
+        input.focus();
+      };
+    };
   };
 
   const handleCreatePin = async() => {
