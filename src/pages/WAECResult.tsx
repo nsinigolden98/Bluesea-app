@@ -12,10 +12,11 @@ import { cn } from '@/lib/utils';
 const WAEC_RESULT_AMOUNT = 950;
 
 export function WAECResult() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const { PinComponent, showPinModal, modalData, message } = PinModal();
   const { user } = useAuth();
+  const defaultPhone = user?.phone ? "0" + user.phone.slice(-10) : '';
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState(defaultPhone);
+  const { PinComponent, showPinModal, modalData, message } = PinModal();
   const { LoaderComponent } = Loader();
   const navigate = useNavigate();
   const { showToast, ToastComponent } = Toast();

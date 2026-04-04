@@ -35,13 +35,15 @@ import {
 } from '@/pages';
 import './App.css';
 import { useAuth } from '@/context/AuthContext';
+import { AuthLoader } from '@/components/ui-custom';
 
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading } = useAuth();
   
   if (loading) {
-    return null;
+    
+    return  <AuthLoader/> ;
   }
   
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
@@ -49,10 +51,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 // Public Route Component (redirects to dashboard if authenticated)
 function PublicRoute({ children}: { children: React.ReactNode}) {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return null;
+  
+    return <AuthLoader/>;
   }
 
   return !isAuthenticated ? <>{children}</> : <Navigate to="/dashboard" />;

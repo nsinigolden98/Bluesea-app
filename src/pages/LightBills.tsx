@@ -88,6 +88,44 @@ export function LightBills() {
       navigate('/pin');
       return
     }
+    else if (isGroupPayment) {
+      if (!groupName) {
+        showToast('Please enter a group name');
+        return;
+      }
+      const memberEmails = inviteMembers.filter(e => e.trim());
+      if (memberEmails.length === 0) {
+        showToast('Please add at least one member to invite');
+        return;
+      }
+      
+      try {
+        const groupData = {
+          name: groupName,
+          service_type: 'lightbill',
+          sub_number: meterNumber,
+          target_amount: Number(amount),
+          plan: BILLER_NAME[biller as keyof BillerName],
+          plan_type: meterType.toLowerCase(),
+          invite_members: memberEmails.join(','),
+        };
+        
+        const groupResponse = await postRequest(ENDPOINTS.create_group, groupData);
+        
+        if (groupResponse.success) {
+          showToast('Group created successfully! Members will be notified.');
+          setIsGroupPayment(false);
+          setGroupName('');
+          setInviteMembers(['']);
+        } else {
+          showToast(groupResponse.error || 'Failed to create group');
+        }
+        return;
+      } catch (error: any) {
+        showToast(error?.error || 'Failed to create group');
+        return;
+      }
+    }
     else {
       showToast("Searching For Customer ...", 3000)
       showLoader()

@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Users, Plus, X, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { postRequest, ENDPOINTS } from '@/types';
 
 const dstvPlans: Record<string, [string, number]> = {
   "DStv Padi N1,850": ["dstv-padi", 1850],
@@ -27,13 +28,14 @@ const dstvPlans: Record<string, [string, number]> = {
 const subscriptionTypes = ["dstv-subscription", "addon"];
 
 export function DSTV() {
+  const { user } = useAuth();
+  const defaultPhone = user?.phone ? "0" + user.phone.slice(-10) : '';
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [smartCardNumber, setSmartCardNumber] = useState('');
   const [selectedPlan, setSelectedPlan] = useState('');
   const [subscriptionType, setSubscriptionType] = useState('dstv-subscription');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(defaultPhone);
   const { PinComponent, showPinModal, modalData, message } = PinModal();
-  const { user } = useAuth();
   const { LoaderComponent } = Loader();
   const navigate = useNavigate();
   const { showToast, ToastComponent } = Toast();
@@ -64,10 +66,48 @@ export function DSTV() {
     if (!smartCardNumber || !selectedPlan || !phoneNumber) {
       showToast('Please fill in all fields');
       return;
-    } else if (!user?.pin_is_set) {
+    }
+    if (!user?.pin_is_set) {
       navigate('/settings');
       navigate('/pin');
       return;
+    }
+    
+    if (isGroupPayment) {
+      if (!groupName) {
+        showToast('Please enter a group name');
+        return;
+      }
+      const memberEmails = inviteMembers.filter(e => e.trim());
+      if (memberEmails.length === 0) {
+        showToast('Please add at least one member to invite');
+        return;
+      }
+      
+      try {
+        const groupData = {
+          name: groupName,
+          service_type: 'dstv',
+          sub_number: smartCardNumber,
+          target_amount: planPrice,
+          plan: selectedPlan,
+          plan_type: subscriptionType,
+          invite_members: memberEmails.join(','),
+        };
+        
+        const groupResponse = await postRequest(ENDPOINTS.create_group, groupData);
+        
+        if (groupResponse.success) {
+          showToast('Group created successfully! Members will be notified.');
+          setIsGroupPayment(false);
+          setGroupName('');
+          setInviteMembers(['']);
+        } else {
+          showToast(groupResponse.error || 'Failed to create group');
+        }
+      } catch (error: any) {
+        showToast(error?.error || 'Failed to create group');
+      }
     } else {
       showPinModal();
     }
@@ -137,20 +177,28 @@ export function DSTV() {
                       />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <Label>Select Plan</Label>
-                      <Select value={selectedPlan} onValueChange={setSelectedPlan}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select DSTV plan" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Object.keys(dstvPlans).map((plan) => (
-                            <SelectItem key={plan} value={plan}>
-                              {plan}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {Object.keys(dstvPlans).map((plan) => {
+                          const planData = dstvPlans[plan];
+                          return (
+                            <button
+                              key={plan}
+                              onClick={() => setSelectedPlan(plan)}
+                              className={cn(
+                                'p-4 rounded-xl border-2 transition-all text-center',
+                                selectedPlan === plan
+                                  ? 'border-sky-500 bg-sky-50 dark:bg-sky-900/20'
+                                  : 'border-slate-200 dark:border-slate-700 hover:border-sky-300'
+                              )}
+                            >
+                              <p className="font-bold text-sm text-slate-800 dark:text-white">{plan}</p>
+                              <p className="text-xs text-slate-500 mt-1">₦{planData[1].toLocaleString()}</p>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
 
                     <div className="space-y-2">

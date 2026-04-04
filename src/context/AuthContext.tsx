@@ -60,6 +60,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           phone: get_user.phone,
           profilePicture: getImageUrl(get_user.image),
           balance: get_balance.balance,
+          lockedBalance: get_balance.locked_balance,
+          availableBalance: get_balance.available_balance,
           pin_is_set: get_user.pin_is_set,
         };
        
@@ -168,7 +170,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await postRequest(ENDPOINTS.logout, {});
+    } catch (error) {
+      console.log('Logout API error:', error);
+    }
     deleteCookie("access_token")
     deleteCookie("refresh_token")
     setState({

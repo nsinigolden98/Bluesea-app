@@ -74,10 +74,15 @@ export function PinModal() {
          response = await postRequest(ENDPOINTS.waec_registration, value);
        } else if (type === 'waec-result') {
          response = await postRequest(ENDPOINTS.waec_result, value);
-       } else if (type === 'jamb') {
-         response = await postRequest(ENDPOINTS.jamb_registration, value);
-       }
-   return response
+        } else if (type === 'jamb') {
+          response = await postRequest(ENDPOINTS.jamb_registration, value);
+        } else if (type === 'auto-topup') {
+          response = await postRequest(ENDPOINTS.auto_topup_create, value);
+        } else if (type === 'auto-topup-reactivate') {
+          const payload = value as { id: number; transaction_pin: string };
+          response = await postRequest(ENDPOINTS.auto_topup_reactivate(payload.id.toString()), { transaction_pin: payload.transaction_pin });
+        }
+    return response
 
   };
  

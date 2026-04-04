@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Lock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 interface BalanceCardProps {
@@ -19,7 +19,8 @@ export function BalanceCard({
   const [showBalance, setShowBalance] = useState(false);
   const { user } = useAuth();
   
-  const balance = user?.balance || 0;
+  const lockedBalance = user?.lockedBalance || '₦0.00';
+  const availableBalance = user?.availableBalance || '₦0.00';
 
   return (
     <div 
@@ -53,9 +54,20 @@ export function BalanceCard({
 
         <div className="mb-6">
           <span className="text-3xl md:text-4xl font-bold text-white">
-            {showBalance ? `${balance.toLocaleString()}` : '******'}
+            {showBalance ? `${availableBalance.toLocaleString()}` : '******'}
           </span>
         </div>
+
+        {/* Locked Balance Display */}
+        {user?.lockedBalance && user.lockedBalance !== '₦0.00' && (
+          <div className="flex items-center gap-2 mb-4 p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+            <Lock className="w-4 h-4 text-sky-200" />
+            <span className="text-sm text-sky-100">Locked:</span>
+            <span className="text-sm font-medium text-white">
+              {showBalance ? lockedBalance : '******'}
+            </span>
+          </div>
+        )}
 
         {showActions && (
           <div className="flex gap-3">

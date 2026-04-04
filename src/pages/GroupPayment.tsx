@@ -3,6 +3,7 @@ import { Sidebar, Header, Toast, Loader } from '@/components/ui-custom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getRequest, postRequest, ENDPOINTS } from '@/types';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
   Plus, 
@@ -47,6 +48,7 @@ interface Group {
 }
 
 export function GroupPayment() {
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
@@ -362,10 +364,7 @@ export function GroupPayment() {
               {/* Action Buttons */}
               <div className="flex gap-3">
                 <Button 
-                  onClick={() => {
-                    // Navigate to create - user should go to Airtime/Data/LightBills
-                    alert('Create a group payment from Airtime, Data, or Light Bills page');
-                  }}
+                  onClick={() => navigate('/services')}
                   className="flex-1 rounded-xl bg-sky-500 hover:bg-sky-600 py-4"
                 >
                   <Plus className="w-5 h-5 mr-2" />

@@ -21,11 +21,12 @@ const examTypes = [
 ];
 
 export function JAMBRegistration() {
+  const { user } = useAuth();
+  const defaultPhone = user?.phone ? "0" + user.phone.slice(-10) : '';
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(defaultPhone);
   const [examType, setExamType] = useState('utme');
   const { PinComponent, showPinModal, modalData, message } = PinModal();
-  const { user } = useAuth();
   const { LoaderComponent } = Loader();
   const navigate = useNavigate();
   const { showToast, ToastComponent } = Toast();

@@ -10,6 +10,8 @@ export interface User {
   phone: string;
   profilePicture?: string;
   balance: string;
+  lockedBalance?: string;
+  availableBalance?: string;
   pin_is_set: boolean;
   bluePoints?: number;
   transactions?: Transaction[];
@@ -348,8 +350,10 @@ export const ENDPOINTS = {
   create_group: `${API_BASE}/payments/group/create/`,
   join_group: `${API_BASE}/payments/group/join-group/`,
   add_to_group: `${API_BASE}/payments/group/add-member/`,
-  my_group: `${API_BASE}/payments/group/my-groups/`,
-  group_detail: `${API_BASE}/payments/group/`,
+  my_groups: `${API_BASE}/payments/group/my-groups/`,
+  group_detail: (id: string) => `${API_BASE}/payments/group/${id}/`,
+  group_payment: `${API_BASE}/payments/group-payment/`,
+  group_payment_history: `${API_BASE}/payments/group-payment/history/`,
   logout: `${API_BASE}/accounts/logout/`,
   events: `${API_BASE}/marketplace/events/all/`,
   create_events: `${API_BASE}/marketplace/events/create/`,

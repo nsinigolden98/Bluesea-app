@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Sidebar, Header, Toast } from '@/components/ui-custom';
+import { Sidebar, Header, Toast, PinModal } from '@/components/ui-custom';
 import { getRequest, postRequest, deleteRequest, ENDPOINTS } from '@/types';
+import { useAuth } from '@/context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { Plus, X, RefreshCw, Clock, Trash2, Play, Pause } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -33,6 +35,8 @@ const repeatOptions = [
 ];
 
 export function AutoTopUp() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [autoTopUps, setAutoTopUps] = useState<AutoTopUp[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,6 +49,7 @@ export function AutoTopUp() {
   const [repeatDays, setRepeatDays] = useState('0');
   const [startDate, setStartDate] = useState('');
   const { showToast, ToastComponent } = Toast();
+  const { showPinModal, PinComponent, message } = PinModal();
 
   const dataPlans: Record<string, string[]> = {
     MTN: ['MTN10GB', 'MTN20GB', 'MTN50GB', 'MTN100GB'],
@@ -56,6 +61,19 @@ export function AutoTopUp() {
   useEffect(() => {
     fetchAutoTopUps();
   }, []);
+
+  useEffect(() => {
+    if (message) {
+      if (message.success || message.code === '000') {
+        showToast(message.response_description || 'Auto top-up created successfully');
+        fetchAutoTopUps();
+        setShowCreateModal(false);
+        resetForm();
+      } else {
+        showToast(message.error || message.response_description || 'Failed to create auto top-up');
+      }
+    }
+  }, [message, showToast]);
 
   const fetchAutoTopUps = async () => {
     try {
@@ -76,28 +94,14 @@ export function AutoTopUp() {
       return;
     }
 
-    const payload = {
-      service_type: serviceType,
-      phone_number: phoneNumber,
-      amount: parseFloat(amount),
-      network: serviceType === 'data' ? selectedNetwork : undefined,
-      plan: serviceType === 'data' ? selectedPlan : undefined,
-      repeat_days: parseInt(repeatDays),
-      start_date: startDate || new Date().toISOString(),
-      is_active: true,
-    };
-
-    try {
-      const data = await postRequest(ENDPOINTS.auto_topup_create, payload);
-      if (data) {
-        showToast('Auto top-up created successfully');
-        fetchAutoTopUps();
-        setShowCreateModal(false);
-        resetForm();
-      }
-    } catch (error: any) {
-      showToast(error?.error || 'Failed to create auto top-up');
+    if (!user?.pin_is_set) {
+      navigate('/settings');
+      navigate('/pin');
+      return;
     }
+
+    setPinActionType('create');
+    showPinModal();
   };
 
   const handleDelete = async (id: number) => {
@@ -122,15 +126,8 @@ export function AutoTopUp() {
     }
   };
 
-  const handleReactivate = async (id: number) => {
-    try {
-      await postRequest(ENDPOINTS.auto_topup_reactivate(id.toString()), {});
-      showToast('Auto top-up reactivated');
-      fetchAutoTopUps();
-    } catch (error: any) {
-      showToast(error?.error || 'Failed to reactivate auto top-up');
-    }
-  };
+  const [selectedReactivateId, setSelectedReactivateId] = useState<number | null>(null);
+  const [pinActionType, setPinActionType] = useState<'create' | 'reactivate' | null>(null);
 
   const resetForm = () => {
     setServiceType('airtime');
@@ -237,7 +234,16 @@ export function AutoTopUp() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleReactivate(topup.id)}
+                            onClick={() => {
+                              if (!user?.pin_is_set) {
+                                navigate('/settings');
+                                navigate('/pin');
+                                return;
+                              }
+                              setSelectedReactivateId(topup.id);
+                              setPinActionType('reactivate');
+                              showPinModal();
+                            }}
                             className="text-green-500 border-green-500 hover:bg-green-50"
                           >
                             <Play className="w-4 h-4" />
@@ -369,6 +375,31 @@ export function AutoTopUp() {
             </div>
           </div>
         </div>
+      )}
+
+      {pinActionType === 'create' && (
+        <PinComponent 
+          type="auto-topup" 
+          value={{
+            service_type: serviceType,
+            phone_number: phoneNumber,
+            amount: parseFloat(amount),
+            network: serviceType === 'data' ? selectedNetwork : undefined,
+            plan: serviceType === 'data' ? selectedPlan : undefined,
+            repeat_days: parseInt(repeatDays),
+            start_date: startDate || new Date().toISOString(),
+            is_active: true,
+          }} 
+        />
+      )}
+
+      {pinActionType === 'reactivate' && (
+        <PinComponent 
+          type="auto-topup-reactivate" 
+          value={{
+            id: selectedReactivateId,
+          }} 
+        />
       )}
 
       <ToastComponent />

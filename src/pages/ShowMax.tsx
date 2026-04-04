@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Users, Plus, X, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { postRequest, ENDPOINTS } from '@/types';
 
 const showmaxPlans: Record<string, [string, number]> = {
   "Full - N8,400 - 3 Months": ["full_3", 8400],
@@ -25,11 +26,12 @@ const showmaxPlans: Record<string, [string, number]> = {
 };
 
 export function ShowMax() {
+  const { user } = useAuth();
+  const defaultPhone = user?.phone ? "0" + user.phone.slice(-10) : '';
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(defaultPhone);
   const [selectedPlan, setSelectedPlan] = useState('');
   const { PinComponent, showPinModal, modalData, message } = PinModal();
-  const { user } = useAuth();
   const { LoaderComponent } = Loader();
   const navigate = useNavigate();
   const { showToast, ToastComponent } = Toast();
@@ -58,10 +60,48 @@ export function ShowMax() {
     if (!selectedPlan || !phoneNumber) {
       showToast('Please fill in all fields');
       return;
-    } else if (!user?.pin_is_set) {
+    }
+    if (!user?.pin_is_set) {
       navigate('/settings');
       navigate('/pin');
       return;
+    }
+    
+    if (isGroupPayment) {
+      if (!groupName) {
+        showToast('Please enter a group name');
+        return;
+      }
+      const memberEmails = inviteMembers.filter(e => e.trim());
+      if (memberEmails.length === 0) {
+        showToast('Please add at least one member to invite');
+        return;
+      }
+      
+      try {
+        const groupData = {
+          name: groupName,
+          service_type: 'showmax',
+          sub_number: phoneNumber,
+          target_amount: planPrice,
+          plan: selectedPlan,
+          plan_type: '',
+          invite_members: memberEmails.join(','),
+        };
+        
+        const groupResponse = await postRequest(ENDPOINTS.create_group, groupData);
+        
+        if (groupResponse.success) {
+          showToast('Group created successfully! Members will be notified.');
+          setIsGroupPayment(false);
+          setGroupName('');
+          setInviteMembers(['']);
+        } else {
+          showToast(groupResponse.error || 'Failed to create group');
+        }
+      } catch (error: any) {
+        showToast(error?.error || 'Failed to create group');
+      }
     } else {
       showPinModal();
     }
@@ -131,20 +171,28 @@ export function ShowMax() {
                       />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <Label>Select Plan</Label>
-                      <Select value={selectedPlan} onValueChange={setSelectedPlan}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select ShowMax plan" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Object.keys(showmaxPlans).map((plan) => (
-                            <SelectItem key={plan} value={plan}>
-                              {plan}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {Object.keys(showmaxPlans).map((plan) => {
+                          const planData = showmaxPlans[plan];
+                          return (
+                            <button
+                              key={plan}
+                              onClick={() => setSelectedPlan(plan)}
+                              className={cn(
+                                'p-4 rounded-xl border-2 transition-all text-center',
+                                selectedPlan === plan
+                                  ? 'border-sky-500 bg-sky-50 dark:bg-sky-900/20'
+                                  : 'border-slate-200 dark:border-slate-700 hover:border-sky-300'
+                              )}
+                            >
+                              <p className="font-bold text-xs text-slate-800 dark:text-white">{plan}</p>
+                              <p className="text-xs text-slate-500 mt-1">₦{planData[1].toLocaleString()}</p>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
 
                     {selectedPlan && (

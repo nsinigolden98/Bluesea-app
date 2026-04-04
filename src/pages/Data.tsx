@@ -9,6 +9,7 @@ import type { Network, DataPlan } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Users, Plus, X, RefreshCw } from 'lucide-react';
+import { postRequest, ENDPOINTS } from '@/types';
 
 type PlanType = 'Daily' | 'Weekly' | 'Monthly' | 'Extravalue';
 
@@ -56,14 +57,55 @@ export function Data() {
     }),
   }
 
-  const handleBuyData = () => {
+  const handleBuyData = async () => {
     if (!phoneNumber || !selectedPlan) {
       alert('Please fill in all fields');
       return;
-    }else if (!user?.pin_is_set) {
+    }
+    if (!user?.pin_is_set) {
       navigate('/settings');
       navigate('/pin');
       return;
+    }
+    
+    if (isGroupPayment) {
+      if (!groupName) {
+        showToast('Please enter a group name');
+        return;
+      }
+      const memberEmails = inviteMembers.filter(e => e.trim());
+      if (memberEmails.length === 0) {
+        showToast('Please add at least one member to invite');
+        return;
+      }
+      
+      const selectedPlanData = dataPlanFunction(selectedNetwork).find(p => p.id === selectedPlan?.id);
+      const planPrice = selectedPlanData?.price || 0;
+      
+      try {
+        const groupData = {
+          name: groupName,
+          service_type: 'data',
+          sub_number: phoneNumber,
+          target_amount: planPrice,
+          plan: selectedPlan,
+          plan_type: selectedPlanData?.planType || '',
+          invite_members: memberEmails.join(','),
+        };
+        
+        const groupResponse = await postRequest(ENDPOINTS.create_group, groupData);
+        
+        if (groupResponse.success) {
+          showToast('Group created successfully! Members will be notified.');
+          setIsGroupPayment(false);
+          setGroupName('');
+          setInviteMembers(['']);
+        } else {
+          showToast(groupResponse.error || 'Failed to create group');
+        }
+      } catch (error: any) {
+        showToast(error?.error || 'Failed to create group');
+      }
     } else {
       console.log(payload)
       showPinModal()

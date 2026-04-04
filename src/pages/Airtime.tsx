@@ -9,6 +9,7 @@ import type { Network } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Users, Plus, X, RefreshCw } from 'lucide-react';
+import { postRequest, ENDPOINTS } from '@/types';
 
 export function Airtime() {
   const { user } = useAuth()
@@ -51,11 +52,44 @@ export function Airtime() {
       navigate('/settings');
       navigate('/pin');
       return;
-    } else {
-      
-      showPinModal()
     }
     
+    if (isGroupPayment) {
+      if (!groupName) {
+        showToast('Please enter a group name');
+        return;
+      }
+      const memberEmails = inviteMembers.filter(e => e.trim());
+      if (memberEmails.length === 0) {
+        showToast('Please add at least one member to invite');
+        return;
+      }
+      
+      try {
+        const groupData = {
+          name: groupName,
+          service_type: 'airtime',
+          sub_number: phoneNumber,
+          target_amount: amount,
+          invite_members: memberEmails.join(','),
+        };
+        
+        const groupResponse = await postRequest(ENDPOINTS.create_group, groupData);
+        
+        if (groupResponse.success) {
+          showToast('Group created successfully! Members will be notified.');
+          setIsGroupPayment(false);
+          setGroupName('');
+          setInviteMembers(['']);
+        } else {
+          showToast(groupResponse.error || 'Failed to create group');
+        }
+      } catch (error: any) {
+        showToast(error?.error || 'Failed to create group');
+      }
+    } else {
+      showPinModal();
+    }
   };
 
   const finalAmount = selectedAmount || Number(customAmount) || 0;
